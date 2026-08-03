@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>for z</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   EACH ENTRY BELOW = ONE TAB.
+   To add the next date: copy a whole { ... } block, paste it at
+   the END of the list, change what's inside. That's the whole job.
+   ══════════════════════════════════════════════════════════════ */
+
+const INVITES = [
+
+  {
+    tab:      "Game night",
+    eyebrow:  "for z — from t",
+    title:    "Game night?",
+    note:     "Hey Z, I had a lot of fun playing house with you. I miss you so much. Can you come back soon? I can't wait to see you. But in the meantime, let's do something fun. What do you think?",
+    rows: [
+      { k: "when",   v: "a night the week of Aug 3, after work" },
+      { k: "what",   v: "a couple of games, best of three" },
+      { k: "stakes", v: "winner gets a prize of their choosing" }
+    ],
+    question: "So — game night with me?",
+    yayLine:  "game night is happening",
+    days:     ["Mon","Tue","Wed","Thu","Fri"]
+  }
+
+  /* ── NEXT DATE: delete the slashes around this block to turn it on ──
+  ,{
+    tab:      "Date 2",
+    eyebrow:  "for z — from t",
+    title:    "Round two?",
+    note:     "Write the sweet part here.",
+    rows: [
+      { k: "when",   v: "" },
+      { k: "what",   v: "" },
+      { k: "stakes", v: "" }
+    ],
+    question: "Well?",
+    yayLine:  "it's happening",
+    days:     ["Fri","Sat","Sun"]
+  }
+  ─────────────────────────────────────────────────────────────── */
+
+];
+
+/* shared across every tab */
+const TAUNTS = [
+  "no isn't one of the options",
+  "that button doesn't work, i checked",
+  "nice try",
+  "it's rigged. obviously.",
+  "you're just making yes look better",
+  "yes is right there. it's not moving.",
+  "still no. still not working.",
+  "the other one is much easier to click",
+  "i'll wait. i've got all night.",
+  "you know you want to",
+  "okay but consider: yes"
+];
+const INITIALS = "ztzt";
+</script>
+
+<style>
+:root{
+  --blush:  #FFF0F5;
+  --petal:  #FFD9E6;
+  --rose:   #F0709B;
+  --deep:   #C24C77;
+  --plum:   #5E2B45;
+  --cream:  #FFFBFC;
+}
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  min-height:100svh;
+  background:
+    radial-gradient(760px 480px at 82% -6%, #FFE1EC, transparent 62%),
+    radial-gradient(620px 520px at 6% 104%, #FFE8F0, transparent 60%),
+    var(--blush);
+  color: var(--plum);
+  font-family:"Karla", system-ui, sans-serif;
+  font-size:15.5px; line-height:1.65;
+  display:grid; place-items:center;
+  padding:26px 18px 40px;
+  -webkit-font-smoothing:antialiased;
+}
+.shell{ width:min(560px,100%); }
+
+/* tabs */
+.tabs{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:14px; }
+.tabs.hide{ display:none; }
+.tab{
+  font-family:"Karla",sans-serif; font-weight:700; font-size:13px; letter-spacing:.04em;
+  padding:9px 18px; border-radius:999px; cursor:pointer;
+  border:1px solid #F6C9DA; background:rgba(255,255,255,.6); color:#C79AAC; transition:.18s;
+}
+.tab:hover{ background:#fff; color:var(--deep); }
+.tab.on{ background:var(--rose); border-color:var(--rose); color:#fff; }
+.tab:focus-visible{ outline:2px solid var(--deep); outline-offset:3px; }
+.tab .yes{ margin-left:6px; }
+
+.card{
+  background:var(--cream);
+  border:1px solid #FBD3E1;
+  border-radius:26px;
+  padding:clamp(28px,6vw,46px);
+  box-shadow:0 24px 60px -30px rgba(194,76,119,.45);
+  text-align:center;
+}
+.fade{ animation:fadein .35s ease-out; }
+@keyframes fadein{ from{ opacity:0; transform:translateY(8px); } }
+
+.eyebrow{ font-family:"Caveat", cursive; font-size:21px; color:var(--rose); margin-bottom:6px; }
+h1{
+  font-family:"Fraunces", Georgia, serif; font-weight:600;
+  font-size:clamp(38px,9.5vw,58px); line-height:1.02;
+  margin:0 0 16px; letter-spacing:-.02em; color:var(--deep);
+}
+.note{ margin:0 auto 26px; max-width:40ch; color:#7B4A60; }
+
+.rows{ text-align:left; border-top:1px dashed #F6C9DA; margin-bottom:28px; }
+.row{ display:flex; gap:16px; align-items:baseline; padding:11px 2px; border-bottom:1px dashed #F6C9DA; }
+.row .k{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--rose); min-width:62px; font-weight:700; }
+.row .v{ flex:1; }
+
+.q{ font-family:"Fraunces", Georgia, serif; font-style:italic; font-size:clamp(21px,4.6vw,27px); line-height:1.25; margin:0 0 22px; }
+.btns{ display:flex; gap:14px; justify-content:center; align-items:center; flex-wrap:wrap; }
+.btn{
+  font-family:"Karla",sans-serif; font-weight:700; font-size:16px;
+  letter-spacing:.06em; padding:13px 34px; border-radius:999px; cursor:pointer;
+  border:1px solid transparent; transition:transform .25s cubic-bezier(.2,.9,.3,1.4), box-shadow .2s, background .2s;
+}
+.btn:focus-visible{ outline:2px solid var(--deep); outline-offset:3px; }
+#yes{ background:var(--rose); color:#fff; box-shadow:0 10px 24px -10px rgba(240,112,155,.9); }
+#yes:hover{ background:var(--deep); }
+.slot{ min-width:120px; min-height:48px; display:grid; place-items:center; }
+#no{ background:#fff; color:#C79AAC; border-color:#F6C9DA; z-index:50; }
+.taunt{ font-family:"Caveat",cursive; font-size:20px; color:var(--rose); min-height:1.5em; margin-top:16px; }
+
+.settled{ font-family:"Caveat",cursive; font-size:26px; color:var(--deep); }
+
+.heart{ margin:30px auto 0; display:block; width:min(200px,60%); height:auto; }
+
+/* yay */
+.yay{ position:fixed; inset:0; z-index:200; display:none; place-items:center; text-align:center; padding:24px;
+  background:radial-gradient(700px 520px at 50% 38%, #FFE3EE, #FFD2E2 78%); }
+.yay.on{ display:grid; animation:fade .35s ease-out; }
+@keyframes fade{ from{ opacity:0; } }
+#pop{ position:absolute; inset:0; width:100%; height:100%; }
+.yay .in{ position:relative; z-index:2; }
+.yay h2{
+  font-family:"Fraunces",Georgia,serif; font-weight:600; font-style:italic;
+  font-size:clamp(84px,26vw,190px); line-height:.9; margin:0; color:var(--deep);
+  text-shadow:0 8px 30px rgba(194,76,119,.28); animation:boing .7s cubic-bezier(.2,1.5,.4,1);
+}
+@keyframes boing{ 0%{ transform:scale(.3); opacity:0; } 60%{ transform:scale(1.12); } 100%{ transform:scale(1); } }
+.yay p{ font-family:"Caveat",cursive; font-size:26px; color:var(--deep); margin:6px 0 22px; }
+.pick{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--deep); opacity:.75; margin-bottom:10px; }
+.days{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+.day{ font-family:"Karla",sans-serif; font-weight:700; font-size:14px; padding:9px 16px; border-radius:999px;
+  border:1px solid #F0A8C2; background:rgba(255,255,255,.7); color:var(--deep); cursor:pointer; transition:.18s; }
+.day:hover{ background:#fff; transform:translateY(-2px); }
+.day.on{ background:var(--rose); color:#fff; border-color:var(--rose); }
+.locked{ font-family:"Caveat",cursive; font-size:24px; color:var(--deep); min-height:1.4em; margin-top:14px; }
+.close{ margin-top:26px; font-family:"Karla",sans-serif; font-weight:700; font-size:13px; letter-spacing:.06em;
+  background:none; border:1px solid var(--deep); color:var(--deep); padding:9px 20px; border-radius:999px; cursor:pointer; }
+.close:hover{ background:var(--deep); color:#fff; }
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="tabs" id="tabs"></nav>
+
+  <main class="card" id="card"></main>
+
+  <svg class="heart" viewBox="0 0 240 200" aria-label="a heart with an arrow through it" role="img">
+    <line x1="14" y1="152" x2="226" y2="48" stroke="#C24C77" stroke-width="5" stroke-linecap="round"/>
+    <path d="M120 176 C 42 120, 20 74, 50 46 C 74 24, 105 31, 120 55 C 135 31, 166 24, 190 46 C 220 74, 198 120, 120 176 Z"
+          fill="#F0709B" stroke="#C24C77" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M226 48 L 206 44 L 212 62 Z" fill="#C24C77"/>
+    <g stroke="#C24C77" stroke-width="4" stroke-linecap="round">
+      <line x1="16" y1="150" x2="30" y2="168"/>
+      <line x1="26" y1="145" x2="40" y2="163"/>
+    </g>
+    <text x="120" y="112" text-anchor="middle" fill="#FFFBFC"
+          font-family="Caveat, cursive" font-size="46" letter-spacing="3" id="initials"></text>
+  </svg>
+</div>
+
+<div class="yay" id="yay">
+  <canvas id="pop"></canvas>
+  <div class="in">
+    <h2>YAY</h2>
+    <p id="yayline"></p>
+    <div class="pick">pick your night</div>
+    <div class="days" id="days"></div>
+    <div class="locked" id="locked"></div>
+    <button class="close" id="close" type="button">back to the invite</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const state = INVITES.map(()=>({ said:false, day:null }));
+  let active = 0;
+
+  $("initials").textContent = INITIALS;
+
+  /* tabs */
+  const tabsEl = $("tabs");
+  function drawTabs(){
+    if(INVITES.length < 2){ tabsEl.classList.add("hide"); return; }
+    tabsEl.innerHTML = INVITES.map((v,i) =>
+      '<button class="tab'+(i===active?' on':'')+'" type="button" data-i="'+i+'">'+v.tab+
+      (state[i].said ? '<span class="yes">&#9825;</span>' : '')+'</button>').join("");
+  }
+  tabsEl.addEventListener("click", e=>{
+    const b = e.target.closest(".tab"); if(!b) return;
+    active = +b.dataset.i; drawTabs(); drawCard();
+  });
+
+  /* card */
+  function drawCard(){
+    const v = INVITES[active], s = state[active];
+    const rows = v.rows.filter(r=>r.v).map(r =>
+      '<div class="row"><span class="k">'+r.k+'</span><span class="v">'+r.v+'</span></div>').join("");
+    const ask = s.said
+      ? '<div class="settled">you said yes'+(s.day ? ' &middot; '+s.day : '')+' &#9825;</div>'
+      : '<div class="btns">'+
+          '<button class="btn" id="yes" type="button">Yes</button>'+
+          '<span class="slot"><button class="btn" id="no" type="button" aria-label="No, good luck">No</button></span>'+
+        '</div><div class="taunt" id="taunt"></div>';
+
+    $("card").className = "card fade";
+    $("card").innerHTML =
+      '<div class="eyebrow">'+v.eyebrow+'</div>'+
+      '<h1>'+v.title+'</h1>'+
+      '<p class="note">'+v.note+'</p>'+
+      '<div class="rows">'+rows+'</div>'+
+      '<p class="q">'+v.question+'</p>'+ ask;
+
+    if(!s.said) wireButtons();
+  }
+
+  /* the no button, which refuses to be caught */
+  function wireButtons(){
+    const no = $("no"), yes = $("yes"), taunt = $("taunt");
+    let n = 0;
+    function dodge(e){
+      if(e) e.preventDefault();
+      n++;
+      const pad = 14, w = no.offsetWidth, h = no.offsetHeight;
+      const x = pad + Math.random() * Math.max(1, innerWidth  - w - pad*2);
+      const y = pad + Math.random() * Math.max(1, innerHeight - h - pad*2);
+      no.style.position = "fixed";
+      no.style.left = x+"px"; no.style.top = y+"px"; no.style.margin = "0";
+      no.style.transform = "scale("+Math.max(.6, 1 - n*.05)+")";
+      no.blur();
+      yes.style.transform = "scale("+Math.min(1.28, 1 + n*.04)+")";
+      taunt.textContent = TAUNTS[(n-1) % TAUNTS.length];
+    }
+    ["pointerenter","pointerdown","touchstart","mouseover","focus","click"].forEach(ev =>
+      no.addEventListener(ev, dodge, {passive:false}));
+
+    yes.addEventListener("click", ()=>{
+      const v = INVITES[active];
+      state[active].said = true;
+      $("yayline").textContent = v.yayLine;
+      $("days").innerHTML = (v.days||[]).map(d =>
+        '<button class="day" type="button">'+d+'</button>').join("");
+      $("locked").textContent = "";
+      $("yay").classList.add("on");
+      document.body.style.overflow = "hidden";
+      if(!reduce) pop();
+    });
+  }
+
+  /* pick a night */
+  $("days").addEventListener("click", e=>{
+    const b = e.target.closest(".day"); if(!b) return;
+    [...$("days").children].forEach(c=>c.classList.remove("on"));
+    b.classList.add("on");
+    state[active].day = b.textContent;
+    $("locked").textContent = b.textContent + " it is \u2661";
+  });
+
+  $("close").addEventListener("click", ()=>{
+    $("yay").classList.remove("on");
+    document.body.style.overflow = "";
+    drawTabs(); drawCard();
+  });
+
+  /* confetti pop */
+  function pop(){
+    const cv = $("pop"), ctx = cv.getContext("2d");
+    let W,H; const fit = ()=>{ W = cv.width = cv.offsetWidth; H = cv.height = cv.offsetHeight; };
+    fit(); addEventListener("resize", fit);
+    const cols = ["#F0709B","#C24C77","#FFD9E6","#FF9FC0","#FFFBFC","#FFB3A7"];
+    const bits = Array.from({length:190}, ()=>{
+      const a = Math.random()*Math.PI*2, s = 5 + Math.random()*15;
+      return { x:W/2, y:H*0.42, vx:Math.cos(a)*s, vy:Math.sin(a)*s - 4,
+               w:7+Math.random()*11, h:5+Math.random()*9, r:Math.random()*6, vr:-.2+Math.random()*.4,
+               c:cols[Math.floor(Math.random()*cols.length)], heart:Math.random()<.28 };
+    });
+    (function frame(){
+      ctx.clearRect(0,0,W,H);
+      let alive = false;
+      bits.forEach(b=>{
+        b.vy += .34; b.vx *= .992; b.x += b.vx; b.y += b.vy; b.r += b.vr;
+        if(b.y < H + 40) alive = true;
+        ctx.save(); ctx.translate(b.x,b.y); ctx.rotate(b.r); ctx.fillStyle = b.c;
+        if(b.heart){
+          const s = b.w/10;
+          ctx.beginPath();
+          ctx.moveTo(0,3*s);
+          ctx.bezierCurveTo(-6*s,-2*s,-3*s,-7*s,0,-3*s);
+          ctx.bezierCurveTo(3*s,-7*s,6*s,-2*s,0,3*s);
+          ctx.fill();
+        } else ctx.fillRect(-b.w/2,-b.h/2,b.w,b.h);
+        ctx.restore();
+      });
+      if(alive) requestAnimationFrame(frame);
+    })();
+  }
+
+  drawTabs(); drawCard();
+})();
+</script>
+</body>
+</html>
