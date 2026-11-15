@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Upper Body Split</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: summary header, week strip, rules, then two day sections of exercise cards (diagram on top, prescription, cues, log). */
+:root{
+  --bg:#f2f3f6; --surface:#ffffff; --ink:#1c2130; --muted:#5d6475; --line:#dde0e8;
+  --steel:#8a92a6; --ghost:#b9bfcb; --panel:#f6f7fa;
+  --a:#c2366f; --a-soft:#fbe9f0; --b:#16807a; --b-soft:#e3f4f2;
+  --good:#1f7a43; --good-soft:#dff3e6; --bad:#b3261e; --warn:#b7791f;
+  --display:"Barlow Condensed", "Arial Narrow", sans-serif;
+  --body:"Barlow", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12141a; --surface:#1b1e27; --ink:#e7e9ef; --muted:#9ba2b3; --line:#2c303c;
+    --steel:#737b8e; --ghost:#4d5363; --panel:#161921;
+    --a:#ec6298; --a-soft:#3a1d29; --b:#3cbcb2; --b-soft:#14302e;
+    --good:#5ccf8a; --good-soft:#163323; --bad:#f2827a; --warn:#e5b45a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12141a; --surface:#1b1e27; --ink:#e7e9ef; --muted:#9ba2b3; --line:#2c303c;
+  --steel:#737b8e; --ghost:#4d5363; --panel:#161921;
+  --a:#ec6298; --a-soft:#3a1d29; --b:#3cbcb2; --b-soft:#14302e;
+    --good:#5ccf8a; --good-soft:#163323; --bad:#f2827a; --warn:#e5b45a;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 20px 56px;display:flex;flex-direction:column;gap:36px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:.01em}
+h1{font-size:clamp(2.2rem,5vw,3.4rem);line-height:1}
+h2{font-size:2rem;line-height:1.05}
+h3{font-size:1.45rem;line-height:1.1}
+p{margin:0}
+.muted{color:var(--muted)}
+header{display:flex;flex-direction:column;gap:14px}
+.lede{max-width:62ch;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-weight:600;font-size:.9rem;font-variant-numeric:tabular-nums}
+
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.day .dn{font-size:.8rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.day .dw{font-family:var(--display);font-size:1.15rem;font-weight:700}
+.day.a{background:var(--a-soft);border-color:var(--a)} .day.a .dw{color:var(--a)}
+.day.b{background:var(--b-soft);border-color:var(--b)} .day.b .dw{color:var(--b)}
+.day.rest .dw{color:var(--muted);font-weight:600}
+.note{font-size:.92rem;color:var(--muted);max-width:70ch}
+
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.rule{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.rule b{font-family:var(--display);font-size:1.15rem;letter-spacing:.02em}
+.rule span{font-size:.93rem;color:var(--muted)}
+
+.legend{display:flex;flex-wrap:wrap;gap:18px;font-size:.9rem;color:var(--muted);align-items:center}
+.legend svg{vertical-align:middle;margin-right:6px}
+
+#days{display:flex;flex-direction:column;gap:44px}
+section.daysec{display:flex;flex-direction:column;gap:16px}
+.dayhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 16px;border-bottom:3px solid var(--day);padding-bottom:8px}
+.dayhead .tag{background:var(--day);color:var(--surface);font-family:var(--display);font-weight:700;font-size:1.05rem;padding:2px 10px;border-radius:6px;letter-spacing:.04em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.fig{background:var(--panel);border-bottom:1px solid var(--line);position:relative;padding:8px 12px 4px}
+.fig svg{display:block;width:100%;height:auto;max-height:190px}
+.num{position:absolute;top:10px;left:12px;width:28px;height:28px;border-radius:50%;background:var(--day);color:var(--surface);display:grid;place-items:center;font-family:var(--display);font-weight:700}
+.body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.target{font-size:.85rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.rx{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.rx .big{font-family:var(--display);font-weight:700;font-size:1.6rem;color:var(--day);font-variant-numeric:tabular-nums}
+.rx .rest{font-size:.88rem;color:var(--muted)}
+ul.cues{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px;font-size:.95rem}
+.log{margin-top:auto;display:grid;grid-template-columns:auto 1fr 1fr;gap:6px 8px;align-items:center;border-top:1px dashed var(--line);padding-top:10px;font-size:.85rem}
+.log .lh{color:var(--muted);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+.log label{font-weight:600;color:var(--muted)}
+.log input{width:100%;min-width:0;font:inherit;font-variant-numeric:tabular-nums;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+.log input:focus-visible,button:focus-visible{outline:2px solid var(--day,var(--a));outline-offset:2px}
+.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 14px;cursor:pointer}
+button:hover{border-color:var(--muted)}
+
+/* tracker */
+.back{color:var(--muted);font-weight:600;font-size:.9rem;text-decoration:none;align-self:flex-start}
+.back:hover{color:var(--ink)}
+.headrow{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:.85rem;font-weight:600;color:var(--muted)}
+.pill .dot{width:8px;height:8px;border-radius:50%;background:var(--steel)}
+.pill.ok .dot{background:var(--good)} .pill.err .dot{background:var(--bad)} .pill.busy .dot{background:var(--warn)}
+.sessbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--day);border-radius:10px;padding:12px 14px}
+.sessbar label{font-weight:600;font-size:.9rem;color:var(--muted)}
+input[type=date],input[type=email],input[type=password]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+button.primary{background:var(--day,var(--a));border-color:var(--day,var(--a));color:var(--surface)}
+button.primary:hover{filter:brightness(1.08);border-color:var(--day,var(--a))}
+.msg{font-size:.9rem;font-weight:600}
+.msg.good{color:var(--good)} .msg.bad{color:var(--bad)}
+.info{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:.88rem;min-height:44px}
+.info .last{display:flex;flex-direction:column;gap:2px;font-variant-numeric:tabular-nums}
+.info .last small{color:var(--muted);font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.up{display:inline-block;background:var(--good-soft);color:var(--good);border-radius:999px;padding:1px 8px;font-size:.78rem;font-weight:700;margin-left:4px}
+.spark{flex:none}
+.hist{display:flex;flex-direction:column;gap:8px}
+.hist details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:0 14px}
+.hist summary{cursor:pointer;padding:12px 0;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;font-variant-numeric:tabular-nums}
+.hist summary::-webkit-details-marker{display:none}
+.hist summary::before{content:"▸";color:var(--muted);transition:transform .15s}
+.hist details[open] summary::before{transform:rotate(90deg)}
+.hist .htag{font-family:var(--display);font-weight:700;font-size:.95rem;padding:0 8px;border-radius:5px;color:var(--surface)}
+.hist table{width:100%;border-collapse:collapse;font-size:.92rem;font-variant-numeric:tabular-nums;margin-bottom:10px}
+.hist th,.hist td{text-align:left;padding:5px 6px;border-top:1px solid var(--line)}
+.hist th{color:var(--muted);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+.hist .hfoot{display:flex;justify-content:flex-end;padding-bottom:12px}
+button.danger{color:var(--bad)} button.danger.arm{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.empty{color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:16px}
+.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.panel p{font-size:.93rem;color:var(--muted)}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.form input{min-width:0;width:100%}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.filebtn{position:relative;overflow:hidden;display:inline-block}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+code{font-size:.85em;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:0 4px}
+@media (max-width:480px){.form{grid-template-columns:1fr}}
+
+/* diagram strokes */
+.s-fig{stroke:var(--ink);stroke-width:4.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.s-sm{stroke:var(--ink);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.s-head{fill:var(--ink)}
+.s-ghost{stroke:var(--ghost);stroke-width:4;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:3 7}
+.s-eq{stroke:var(--steel);fill:none;stroke-linecap:round}
+.s-eqg{stroke:var(--ghost);fill:none;stroke-linecap:round}
+.s-eqf{fill:var(--steel)}
+.s-pad{fill:var(--ghost);opacity:.55}
+.s-cable{stroke:var(--steel);stroke-width:1.5}
+.s-floor{stroke:var(--line);stroke-width:2}
+.s-move-a{stroke:var(--a);stroke-width:2.5;fill:none;marker-end:url(#arrA)}
+.s-move-b{stroke:var(--b);stroke-width:2.5;fill:none;marker-end:url(#arrB)}
+.s-lbl{fill:var(--muted);font:600 9px var(--body)}
+
+@media (max-width:640px){
+  .week{grid-template-columns:repeat(4,1fr)}
+  .wrap{padding:24px 16px 48px}
+}
+@media print{
+  body{background:#fff}
+  .tools{display:none}
+  .card{break-inside:avoid}
+  section.daysec{break-before:page}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="arrA" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill:var(--a)"/></marker>
+    <marker id="arrB" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill:var(--b)"/></marker>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header>
+    <a href="./" class="back">&larr; back to the site</a>
+    <div class="headrow"><h1>Upper Body Split</h1><span class="pill" id="syncpill" role="status"><span class="dot"></span><span id="synctext">Saved on this device</span></span></div>
+    <p class="lede">Two upper days a week built around back, shoulders and arms, with no chest work. Every exercise is 2 working sets in the 12 to 20 rep range, so each session runs about 30 to 35 minutes.</p>
+    <div class="chips">
+      <span class="chip">2 upper days / week</span>
+      <span class="chip">6 exercises per day</span>
+      <span class="chip">2 sets each</span>
+      <span class="chip">12–20 reps</span>
+      <span class="chip">60–90 s rest</span>
+    </div>
+  </header>
+
+  <section style="display:flex;flex-direction:column;gap:12px" aria-labelledby="wk">
+    <h2 id="wk">Sample week</h2>
+    <div class="week">
+      <div class="day"><span class="dn">Mon</span><span class="dw">Lower</span></div>
+      <div class="day a"><span class="dn">Tue</span><span class="dw">Upper A</span></div>
+      <div class="day rest"><span class="dn">Wed</span><span class="dw">Rest</span></div>
+      <div class="day"><span class="dn">Thu</span><span class="dw">Lower</span></div>
+      <div class="day b"><span class="dn">Fri</span><span class="dw">Upper B</span></div>
+      <div class="day rest"><span class="dn">Sat</span><span class="dw">Rest</span></div>
+      <div class="day rest"><span class="dn">Sun</span><span class="dw">Rest</span></div>
+    </div>
+    <p class="note">Slide Upper A and Upper B into whatever days are open around her lower days. Try to keep at least one day between A and B so grip and rear delts recover. If she wants a third upper day, repeat A the following week first, then alternate.</p>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:12px" aria-labelledby="rl">
+    <h2 id="rl">How to run it</h2>
+    <div class="rules">
+      <div class="rule"><b>Warm up</b><span>One light set of the first exercise of the day. It does not count as a working set.</span></div>
+      <div class="rule"><b>Effort</b><span>Both sets should end with only 1 or 2 clean reps left in the tank.</span></div>
+      <div class="rule"><b>Tempo</b><span>Lift in about 1 second, lower in 2 to 3 seconds. No swinging.</span></div>
+      <div class="rule"><b>Rest</b><span>60 to 90 seconds between sets and between exercises.</span></div>
+      <div class="rule"><b>Progress</b><span>When she hits the top of the rep range on both sets, go up the smallest weight jump next session.</span></div>
+    </div>
+    <div class="legend">
+      <span><svg width="34" height="10"><line x1="3" y1="5" x2="31" y2="5" class="s-fig" style="stroke-width:3.5"/></svg>Finish position</span>
+      <span><svg width="34" height="10"><line x1="3" y1="5" x2="31" y2="5" class="s-ghost" style="stroke-width:3.5"/></svg>Start position</span>
+      <span><svg width="34" height="12"><line x1="3" y1="6" x2="27" y2="6" class="s-move-a"/></svg>Direction of the lift</span>
+    </div>
+  </section>
+
+  <div id="days"></div>
+
+  <section style="display:flex;flex-direction:column;gap:12px" aria-labelledby="hh">
+    <h2 id="hh">Session history</h2>
+    <div class="hist" id="history"></div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:12px" aria-labelledby="dd">
+    <h2 id="dd">Sync and backup</h2>
+    <div class="panels">
+      <div class="panel" id="syncpanel"></div>
+      <div class="panel">
+        <h3>Backup</h3>
+        <p>Download every saved session as a file. Import it on any device to restore or merge. Sessions already on the device are kept.</p>
+        <div class="row">
+          <button type="button" id="dl">Download backup</button>
+          <button type="button" id="cp">Copy backup</button>
+          <span class="filebtn"><button type="button" tabindex="-1">Import backup</button><input type="file" id="imp" accept="application/json,.json" aria-label="Import backup file"></span>
+        </div>
+        <span class="msg" id="bmsg" role="status"></span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+// ===== Cloud sync settings: paste from Supabase > Project Settings > API =====
+const SUPABASE_URL = 'https://hdhcecefwmcdnizojdux.supabase.co';     // e.g. 'https://abcdxyz.supabase.co'
+const SUPABASE_ANON_KEY = 'sb_publishable_jvNoe6KqkidzeyFQTcANfw_yGOtg78M';  // the "anon" / "publishable" key (safe to put in a public page)
+// ============================================================================
+
+// ---------- drawing helpers ----------
+const P=(pts,c='s-fig')=>`<polyline class="${c}" points="${pts}"/>`;
+const H=(x,y,r=9)=>`<circle class="s-head" cx="${x}" cy="${y}" r="${r}"/>`;
+const LN=(x1,y1,x2,y2,c,w)=>`<line class="${c}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"${w?` stroke-width="${w}"`:''}/>`;
+const R=(x,y,w,h,c='s-eqf',rx=2)=>`<rect class="${c}" x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}"/>`;
+const C=(x,y,r,c='s-eqf')=>`<circle class="${c}" cx="${x}" cy="${y}" r="${r}"/>`;
+const FLOOR=LN(8,141,192,141,'s-floor');
+// dumbbell seen along its length (handle points at viewer)
+const DE=(x,y,g)=>C(x,y,6.5,g?'s-pad':'s-eqf')+`<circle cx="${x}" cy="${y}" r="2" style="fill:var(--panel)"/>`;
+// dumbbell seen from the side, rotated by ang degrees
+function DB(cx,cy,ang,g){
+  const r=ang*Math.PI/180,h=11,dx=Math.cos(r)*h,dy=Math.sin(r)*h,px=-Math.sin(r)*7,py=Math.cos(r)*7;
+  const c=g?'s-eqg':'s-eq',x1=cx-dx,y1=cy-dy,x2=cx+dx,y2=cy+dy;
+  return LN(x1.toFixed(1),y1.toFixed(1),x2.toFixed(1),y2.toFixed(1),c,3)
+   +LN((x1-px).toFixed(1),(y1-py).toFixed(1),(x1+px).toFixed(1),(y1+py).toFixed(1),c,6)
+   +LN((x2-px).toFixed(1),(y2-py).toFixed(1),(x2+px).toFixed(1),(y2+py).toFixed(1),c,6);
+}
+const COL=(py)=>R(172,10,12,131)+C(172,py,4.5);
+// front-view seated body (torso, hips, legs)
+const SEAT_FRONT=(top)=>R(74,112,52,7)+LN(100,119,100,141,'s-eq',4)
+  +P(`100,${top} 100,112`)+P('94,112 106,112')+P('94,112 86,124 86,140 80,140')+P('106,112 114,124 114,140 120,140');
+// side-view standing legs + torso
+const STAND=(hipX,shX,shY)=>P(`${hipX+2},140 ${hipX+2},116 ${hipX},92 ${shX},${shY}`)+P(`${hipX-4},140 ${hipX+12},140`);
+
+const D={
+latpull:m=>FLOOR+LN(100,0,100,72,'s-cable')
+  +LN(56,22,144,22,'s-eqg',3.5)+P('90,78 66,22','s-ghost')+P('110,78 134,22','s-ghost')
+  +SEAT_FRONT(70)+P('90,78 110,78')+H(100,60)
+  +LN(54,72,146,72,'s-eq',4)+P('90,78 72,98 66,72')+P('110,78 128,98 134,72')
+  +LN(168,28,168,64,m),
+
+cablerow:m=>FLOOR+COL(96)+R(36,112,48,7)+LN(60,119,60,141,'s-eq',4)+LN(132,100,140,128,'s-eq',4)
+  +P('64,76 116,92','s-ghost')
+  +P('60,110 64,72')+H(68,60)+P('60,110 100,96 132,112')
+  +LN(80,96,168,96,'s-cable')+P('64,76 44,90 80,96')+LN(80,90,80,102,'s-eq',3)
+  +LN(132,78,92,78,m),
+
+dbrow:m=>FLOOR+R(34,96,96,8)+LN(44,104,44,141,'s-eq',4)+LN(120,104,120,141,'s-eq',4)
+  +P('62,74 62,124','s-ghost')+DE(62,128,1)
+  +P('54,72 110,78')+H(40,66)+P('52,72 50,95')+P('110,78 104,94 128,94')+P('112,79 140,108 142,140 150,140')
+  +P('62,74 88,60 80,88')+DE(80,90)
+  +LN(74,126,74,104,m),
+
+straightarm:m=>FLOOR+COL(24)
+  +P('98,62 140,46','s-ghost')
+  +STAND(76,100,58)+H(108,50)
+  +LN(104,104,172,24,'s-cable')+P('98,62 104,104')+LN(98,104,110,104,'s-eq',3)
+  +`<path class="${m}" d="M150 58 A 52 52 0 0 1 114 112"/>`,
+
+curl:m=>FLOOR
+  +P('94,88 98,116','s-ghost')+DE(98,120,1)
+  +STAND(92,92,58)+H(94,46)+P('92,60 94,88 114,66')+DE(116,64)
+  +`<path class="${m}" d="M108 122 A 36 36 0 0 0 128 74"/>`,
+
+hammer:m=>FLOOR
+  +P('94,88 98,116','s-ghost')+DB(98,119,0,1)
+  +STAND(92,92,58)+H(94,46)+P('92,60 94,88 114,66')+DB(115,65,42)
+  +`<path class="${m}" d="M108 124 A 38 38 0 0 0 130 72"/>`,
+
+press:m=>FLOOR+R(90,54,20,58,'s-pad',3)
+  +P('86,76 66,80 68,56','s-ghost')+P('114,76 134,80 132,56','s-ghost')+DB(68,53,0,1)+DB(132,53,0,1)
+  +SEAT_FRONT(72)+P('86,76 114,76')+H(100,62)
+  +P('86,76 74,48 82,22')+P('114,76 126,48 118,22')+DB(80,19,0)+DB(120,19,0)
+  +LN(166,70,166,28,m),
+
+lateral:m=>FLOOR
+  +P('86,62 82,100','s-ghost')+P('114,62 118,100','s-ghost')+DE(82,104,1)+DE(118,104,1)
+  +P('100,58 100,96')+P('86,62 114,62')+P('93,96 107,96')+P('93,96 90,118 90,140 84,140')+P('107,96 110,118 110,140 116,140')+H(100,46)
+  +P('86,62 62,66 42,64')+P('114,62 138,66 158,64')+DE(38,64)+DE(162,64)
+  +`<path class="${m}" d="M73 106 A 46 46 0 0 1 42 76"/><path class="${m}" d="M127 106 A 46 46 0 0 0 158 76"/>`,
+
+reardelt:m=>FLOOR
+  +P('84,82 84,116','s-ghost')+P('116,82 116,116','s-ghost')+DE(84,121,1)+DE(116,121,1)
+  +H(100,73,8)+P('100,104 100,84')+P('84,82 116,82')+P('92,104 108,104')+P('92,104 86,122 90,140 84,140')+P('108,104 114,122 110,140 116,140')
+  +P('84,82 46,80')+P('116,82 154,80')+DE(42,80)+DE(158,80)
+  +`<path class="${m}" d="M75 120 A 38 38 0 0 1 48 92"/><path class="${m}" d="M125 120 A 38 38 0 0 0 152 92"/>`
+  +P('160,48 163,36 157,27','s-sm')+P('157,27 177,15','s-sm')+`<circle class="s-head" cx="182" cy="12" r="3.5"/>`+P('175,16 176,30','s-sm')+LN(150,49,194,49,'s-floor')
+  +`<text class="s-lbl" x="150" y="60">side view</text>`,
+
+facepull:m=>FLOOR+COL(46)
+  +P('84,62 130,52','s-ghost')
+  +STAND(84,84,58)+H(86,46)
+  +LN(90,38,172,46,'s-cable')+P('84,62 64,54 90,38')
+  +LN(150,24,106,24,m),
+
+pushdown:m=>FLOOR+COL(22)
+  +P('96,88 122,70','s-ghost')
+  +STAND(92,96,58)+H(99,46)
+  +LN(102,116,172,22,'s-cable')+P('96,62 96,88 102,116')+LN(96,116,108,116,'s-eq',3)
+  +`<path class="${m}" d="M128 75 A 34 34 0 0 1 108 120"/>`,
+
+overhead:m=>FLOOR+R(60,112,48,7)+LN(84,119,84,141,'s-eq',4)
+  +P('96,44 74,62','s-ghost')+DB(72,66,70,1)
+  +P('84,110 86,74')+P('84,110 114,112 116,140 128,140')+H(90,62)
+  +P('86,76 96,44 100,20')+DB(100,16,88)
+  +`<path class="${m}" d="M66 70 A 39 39 0 0 1 104 6"/>`
+};
+
+// ---------- program ----------
+const DAYS=[
+ {id:'a',tag:'UPPER A',title:'Back and Biceps',sub:'Pulling day. Lats, mid back, rear delts, biceps.',color:'var(--a)',move:'s-move-a',ex:[
+  {d:'latpull',n:'Lat Pulldown',t:'Lats, upper back',rx:'2 × 12–15',cues:['Grip a little wider than shoulders','Lean back slightly, pull bar to the top of the chest','Drive elbows down toward the back pockets','Let it rise slowly for 2 seconds']},
+  {d:'cablerow',n:'Seated Cable Row',t:'Mid back, lats',rx:'2 × 12–15',cues:['Sit tall with a slight knee bend','Pull the handle to the belly button','Squeeze shoulder blades together at the end','Keep the torso still, no rocking']},
+  {d:'dbrow',n:'Single-Arm Dumbbell Row',t:'Lats, rhomboids',rx:'2 × 12–15 / side',cues:['One hand and knee on the bench, back flat','Pull the dumbbell toward the hip','Pause for 1 second at the top']},
+  {d:'straightarm',n:'Straight-Arm Cable Pulldown',t:'Lats',rx:'2 × 15–20',cues:['Rope or straight bar on the high pulley','Hinge slightly, arms long with soft elbows','Sweep down to the thighs and squeeze']},
+  {d:'curl',n:'Dumbbell Curl',t:'Biceps',rx:'2 × 12–15',cues:['Elbows pinned to the sides','Palms face up the whole way','Lower in 2 to 3 seconds']},
+  {d:'hammer',n:'Hammer Curl',t:'Biceps, forearms',rx:'2 × 12–15',cues:['Palms face each other the whole time','No swinging from the hips','Alternate arms or do both together']}
+ ]},
+ {id:'b',tag:'UPPER B',title:'Shoulders and Triceps',sub:'Delts from every angle plus triceps, with no pressing that loads the chest.',color:'var(--b)',move:'s-move-b',ex:[
+  {d:'press',n:'Seated Dumbbell Shoulder Press',t:'Front and side delts',rx:'2 × 12–15',cues:['Back flat on an upright bench, core tight','Start with dumbbells at ear height','Press up and slightly in without clanking']},
+  {d:'lateral',n:'Lateral Raise',t:'Side delts',rx:'2 × 15–20',cues:['Light weight, small bend in the elbows','Lead with the elbows, stop at shoulder height','Slow on the way down']},
+  {d:'reardelt',n:'Bent-Over Rear Delt Fly',t:'Rear delts, upper back',rx:'2 × 15–20',cues:['Hinge until the torso is about 45° or lower, back flat','Raise arms out wide like opening wings','Keep it light and do not shrug']},
+  {d:'facepull',n:'Face Pull',t:'Rear delts, rotator cuff',rx:'2 × 15–20',cues:['Rope set around forehead height','Pull toward the face, hands finish beside the ears','Elbows stay high and wide']},
+  {d:'pushdown',n:'Rope Triceps Pushdown',t:'Triceps',rx:'2 × 12–15',cues:['Elbows locked at the sides','Push down and spread the rope at the bottom','Only the forearms move']},
+  {d:'overhead',n:'Overhead Dumbbell Triceps Extension',t:'Triceps (long head)',rx:'2 × 12–15',cues:['Seated, one dumbbell held in both hands','Elbows point up and stay close to the head','Lower behind the head, then extend fully']}
+ ]}
+];
+
+// ---------- helpers ----------
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
+const fmtDate=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s||'');if(!m)return esc(s);return new Date(+m[1],m[2]-1,+m[3]).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})};
+const uuid=()=>(crypto.randomUUID?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&3|8)).toString(16)}));
+const num=v=>{const n=parseFloat(String(v??'').replace(',','.'));return Number.isFinite(n)?n:null};
+const ts=s=>{const t=Date.parse(s||'');return Number.isFinite(t)?t:0};
+const fmtSet=(w,r)=>(w==null&&r==null)?'–':`${w??'–'} × ${r??'–'}`;
+
+const EX={};
+DAYS.forEach(day=>day.ex.forEach(e=>{
+  const m=/–(\d+)/.exec(e.rx);
+  EX[e.d]={...e,day:day.id,top:m?+m[1]:15};
+}));
+const DAYMAP=Object.fromEntries(DAYS.map(d=>[d.id,d]));
+
+// ---------- local state ----------
+const LS='ubsplit-v2';
+let state={sessions:[],drafts:{a:{},b:{}}};
+try{
+  const raw=JSON.parse(localStorage.getItem(LS)||'null');
+  if(raw&&Array.isArray(raw.sessions)) state={sessions:raw.sessions,drafts:raw.drafts||{a:{},b:{}}};
+  else{ // carry over typed values from the first version of this page
+    const old=JSON.parse(localStorage.getItem('ubsplit-log-v1')||'{}')||{};
+    const map={'1w':'w1','1r':'r1','2w':'w2','2r':'r2'};
+    Object.entries(old).forEach(([k,v])=>{
+      const m=/^([ab])(\d)-(\w\w)$/.exec(k); if(!m||!v) return;
+      const ex=DAYS.find(d=>d.id===m[1])?.ex[m[2]-1]; if(!ex) return;
+      ((state.drafts[m[1]]??={})[ex.d]??={})[map[m[3]]]=v;
+    });
+  }
+}catch(e){}
+state.drafts.a??={}; state.drafts.b??={};
+const persist=()=>{try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}};
+
+const live=()=>state.sessions.filter(s=>!s.deleted);
+const byDateDesc=(x,y)=>(y.performed_on||'').localeCompare(x.performed_on||'')||ts(y.updated_at)-ts(x.updated_at);
+function lastFor(exId){return live().filter(s=>s.entries&&s.entries[exId]).sort(byDateDesc)[0]}
+function seriesFor(exId){
+  return live().filter(s=>s.entries&&s.entries[exId]).sort(byDateDesc).slice(0,10).reverse()
+    .map(s=>{const e=s.entries[exId];return Math.max(num(e.w1)??-1,num(e.w2)??-1)}).filter(v=>v>=0);
+}
+
+// ---------- render days ----------
+const host=$('days');
+let html='';
+DAYS.forEach(day=>{
+  html+=`<section class="daysec" style="--day:${day.color}" aria-labelledby="h-${day.id}">
+    <div class="dayhead"><span class="tag">${day.tag}</span><h2 id="h-${day.id}">${day.title}</h2><span class="muted">${day.sub}</span></div>
+    <div class="sessbar">
+      <label for="date-${day.id}">Session date</label><input type="date" id="date-${day.id}">
+      <button type="button" class="primary" id="save-${day.id}">Save ${day.tag.replace('UPPER','Upper')} session</button>
+      <span class="msg" id="msg-${day.id}" role="status"></span>
+    </div>
+    <div class="grid">`;
+  day.ex.forEach((e,i)=>{
+    const inp=(f,lbl)=>`<input id="in-${e.d}-${f}" data-day="${day.id}" data-ex="${e.d}" data-f="${f}" inputmode="decimal" autocomplete="off" aria-label="${esc(e.n)} ${lbl}">`;
+    html+=`<article class="card">
+      <div class="fig"><span class="num">${i+1}</span>
+        <svg viewBox="0 0 200 150" role="img" aria-label="Diagram of the ${e.n}">${D[e.d](day.move)}</svg></div>
+      <div class="body">
+        <div><div class="target">${e.t}</div><h3>${e.n}</h3></div>
+        <div class="rx"><span class="big">${e.rx}</span><span class="rest">rest 60–90 s</span></div>
+        <ul class="cues">${e.cues.map(c=>`<li>${c}</li>`).join('')}</ul>
+        <div class="info" id="info-${e.d}"></div>
+        <div class="log">
+          <span></span><span class="lh">Weight (lb)</span><span class="lh">Reps</span>
+          <span class="lh" style="text-transform:none;font-size:.85rem">Set 1</span>${inp('w1','set 1 weight')}${inp('r1','set 1 reps')}
+          <span class="lh" style="text-transform:none;font-size:.85rem">Set 2</span>${inp('w2','set 2 weight')}${inp('r2','set 2 reps')}
+        </div>
+      </div></article>`;
+  });
+  html+=`</div></section>`;
+});
+host.innerHTML=html;
+
+DAYS.forEach(day=>{
+  $(`date-${day.id}`).value=today();
+  $(`save-${day.id}`).addEventListener('click',()=>saveSession(day.id));
+});
+document.querySelectorAll('.log input').forEach(inp=>{
+  const {day,ex,f}=inp.dataset;
+  inp.value=state.drafts[day]?.[ex]?.[f]??'';
+  inp.addEventListener('input',()=>{((state.drafts[day]??={})[ex]??={})[f]=inp.value;persist();});
+});
+
+function spark(vals){
+  if(vals.length<2) return '';
+  const w=96,h=28,p=3,mn=Math.min(...vals),mx=Math.max(...vals),rg=mx-mn||1;
+  const pts=vals.map((v,i)=>[p+i*(w-2*p)/(vals.length-1),mx===mn?h/2:h-p-(v-mn)/rg*(h-2*p)]);
+  const last=pts[pts.length-1];
+  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="Weight trend over last ${vals.length} sessions, ${vals[0]} to ${vals[vals.length-1]} lb">
+    <polyline points="${pts.map(q=>q.map(n=>n.toFixed(1)).join(',')).join(' ')}" fill="none" stroke="var(--day)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="3" fill="var(--day)"/></svg>`;
+}
+function renderInfo(){
+  Object.values(EX).forEach(ex=>{
+    const el=$(`info-${ex.d}`), s=lastFor(ex.d);
+    if(!s){el.innerHTML=`<span class="muted">No sessions logged yet</span>`;setPh(ex.d,null);return;}
+    const e=s.entries[ex.d], r1=num(e.r1), r2=num(e.r2);
+    const ready=r1!=null&&r2!=null&&r1>=ex.top&&r2>=ex.top;
+    el.innerHTML=`<div class="last"><small>Last time · ${fmtDate(s.performed_on)}</small>
+      <span>${esc(fmtSet(num(e.w1),r1))}, ${esc(fmtSet(num(e.w2),r2))}${ready?'<span class="up">Go up in weight</span>':''}</span></div>${spark(seriesFor(ex.d))}`;
+    setPh(ex.d,e);
+  });
+}
+function setPh(exId,e){
+  ['w1','r1','w2','r2'].forEach(f=>{const i=$(`in-${exId}-${f}`);if(i)i.placeholder=e&&num(e[f])!=null?String(num(e[f])):'–';});
+}
+
+function flash(id,text,kind){const m=$(id);m.textContent=text;m.className='msg '+(kind||'');clearTimeout(m._t);m._t=setTimeout(()=>{m.textContent=''},4000);}
+
+function saveSession(dayId){
+  const day=DAYMAP[dayId], drafts=state.drafts[dayId]||{}, entries={};
+  day.ex.forEach(e=>{
+    const d=drafts[e.d]||{}, v={w1:num(d.w1),r1:num(d.r1),w2:num(d.w2),r2:num(d.r2)};
+    if(Object.values(v).some(x=>x!=null)) entries[e.d]=v;
+  });
+  if(!Object.keys(entries).length){flash(`msg-${dayId}`,'Enter at least one weight or rep count first.','bad');return;}
+  const now=new Date().toISOString();
+  state.sessions.push({id:uuid(),day:dayId,performed_on:$(`date-${dayId}`).value||today(),entries,deleted:false,created_at:now,updated_at:now});
+  state.drafts[dayId]={};
+  document.querySelectorAll(`.log input[data-day="${dayId}"]`).forEach(i=>i.value='');
+  persist();renderInfo();renderHistory();
+  flash(`msg-${dayId}`,`Saved ${Object.keys(entries).length} exercise${Object.keys(entries).length===1?'':'s'}.`,'good');
+  sync();
+}
+
+// ---------- history ----------
+function renderHistory(){
+  const list=live().sort(byDateDesc), h=$('history');
+  if(!list.length){h.innerHTML=`<div class="empty">No sessions yet. Fill in a day above and press Save.</div>`;return;}
+  h.innerHTML=list.map(s=>{
+    const day=DAYMAP[s.day]||{tag:esc(s.day),color:'var(--steel)',title:''};
+    const rows=Object.entries(s.entries||{}).map(([k,e])=>`<tr><td>${esc(EX[k]?.n||k)}</td><td>${esc(fmtSet(num(e.w1),num(e.r1)))}</td><td>${esc(fmtSet(num(e.w2),num(e.r2)))}</td></tr>`).join('');
+    return `<details><summary><strong>${fmtDate(s.performed_on)}</strong><span class="htag" style="background:${day.color}">${day.tag}</span><span class="muted">${Object.keys(s.entries||{}).length} exercise${Object.keys(s.entries||{}).length===1?'':'s'}</span></summary>
+      <table><thead><tr><th>Exercise</th><th>Set 1 (lb × reps)</th><th>Set 2 (lb × reps)</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="hfoot"><button type="button" class="danger" data-del="${esc(s.id)}">Delete session</button></div></details>`;
+  }).join('');
+}
+$('history').addEventListener('click',ev=>{
+  const b=ev.target.closest('button[data-del]'); if(!b) return;
+  if(!b.classList.contains('arm')){b.classList.add('arm');b.textContent='Tap again to delete';setTimeout(()=>{if(b.isConnected){b.classList.remove('arm');b.textContent='Delete session';}},3500);return;}
+  const s=state.sessions.find(x=>x.id===b.dataset.del); if(!s) return;
+  s.deleted=true;s.updated_at=new Date().toISOString();
+  persist();renderInfo();renderHistory();sync();
+});
+
+// ---------- backup ----------
+const backupText=()=>JSON.stringify({app:'upper-body-split',version:2,exported_at:new Date().toISOString(),sessions:state.sessions},null,2);
+$('dl').addEventListener('click',()=>{
+  try{
+    const url=URL.createObjectURL(new Blob([backupText()],{type:'application/json'}));
+    const a=document.createElement('a');a.href=url;a.download=`workouts-backup-${today()}.json`;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),2000);
+    flash('bmsg',`Backup of ${live().length} sessions downloaded. If nothing appeared, use Copy backup.`,'good');
+  }catch(e){flash('bmsg','Download was blocked here. Use Copy backup instead.','bad');}
+});
+$('cp').addEventListener('click',async()=>{
+  try{await navigator.clipboard.writeText(backupText());flash('bmsg','Backup copied. Paste it into a note or a .json file.','good');}
+  catch(e){flash('bmsg','Copy was blocked by the browser.','bad');}
+});
+function mergeSessions(incoming){
+  let added=0,updated=0;
+  const idx=new Map(state.sessions.map((s,i)=>[s.id,i]));
+  incoming.forEach(r=>{
+    if(!r||!r.id||!r.day||!r.performed_on) return;
+    const s={id:String(r.id),day:String(r.day),performed_on:String(r.performed_on).slice(0,10),entries:r.entries&&typeof r.entries==='object'?r.entries:{},
+      deleted:!!r.deleted,created_at:r.created_at||r.updated_at||new Date().toISOString(),updated_at:new Date(ts(r.updated_at)||Date.now()).toISOString()};
+    if(!idx.has(s.id)){idx.set(s.id,state.sessions.length);state.sessions.push(s);added++;}
+    else if(ts(s.updated_at)>ts(state.sessions[idx.get(s.id)].updated_at)){state.sessions[idx.get(s.id)]=s;updated++;}
+  });
+  return {added,updated};
+}
+$('imp').addEventListener('change',async ev=>{
+  const f=ev.target.files[0]; if(!f) return;
+  try{
+    const data=JSON.parse(await f.text());
+    const arr=Array.isArray(data)?data:data.sessions;
+    if(!Array.isArray(arr)) throw new Error('no sessions');
+    const {added,updated}=mergeSessions(arr);
+    persist();renderInfo();renderHistory();sync();
+    flash('bmsg',`Imported: ${added} new, ${updated} updated.`,'good');
+  }catch(e){flash('bmsg','That file is not a workout backup. Pick the .json file from Download backup.','bad');}
+  ev.target.value='';
+});
+
+// ---------- cloud sync (Supabase) ----------
+const TABLE='workout_sessions';
+let sb=null,user=null,syncing=false,again=false,lastSync=null,syncErr=null;
+const configured=!!(SUPABASE_URL&&SUPABASE_ANON_KEY);
+if(configured&&window.supabase){try{sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);}catch(e){syncErr='Could not start sync. Check the URL and key.';}}
+
+function setPill(){
+  const p=$('syncpill'),t=$('synctext');p.className='pill';
+  if(!sb||!user){t.textContent='Saved on this device';return;}
+  if(syncing){p.classList.add('busy');t.textContent='Syncing…';return;}
+  if(syncErr){p.classList.add('err');t.textContent='Sync problem';return;}
+  p.classList.add('ok');t.textContent=lastSync?`Synced ${lastSync.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}`:'Signed in';
+}
+function renderSync(){
+  const el=$('syncpanel');
+  if(!configured){
+    el.innerHTML=`<h3>Cloud sync</h3><p>Not set up yet. Add your Supabase project URL and anon key at the top of the script in this file, then reload. Until then, everything is saved on this device only.</p>`;
+  }else if(!sb){
+    el.innerHTML=`<h3>Cloud sync</h3><p class="msg bad">${esc(syncErr||'The sync library did not load. Check your connection and reload.')}</p>`;
+  }else if(!user){
+    el.innerHTML=`<h3>Cloud sync</h3><p>Sign in to keep sessions in sync across phone and laptop.</p>
+      <form class="form" id="sf"><input type="email" id="se" placeholder="Email" autocomplete="username" required aria-label="Email">
+      <input type="password" id="sp" placeholder="Password" autocomplete="current-password" required aria-label="Password">
+      <button type="submit" class="primary" style="grid-column:1/-1">Sign in</button></form><span class="msg" id="smsg" role="status"></span>`;
+    $('sf').addEventListener('submit',async ev=>{
+      ev.preventDefault();
+      const {error}=await sb.auth.signInWithPassword({email:$('se').value.trim(),password:$('sp').value});
+      if(error){$('smsg').textContent=error.message||'Sign in failed.';$('smsg').className='msg bad';}
+    });
+  }else{
+    el.innerHTML=`<h3>Cloud sync</h3><p>Signed in as <strong>${esc(user.email)}</strong>. Sessions sync when you save, delete, import, or come back to this tab.</p>
+      <div class="row"><button type="button" id="sn">Sync now</button><button type="button" id="so">Sign out</button></div>
+      <span class="msg ${syncErr?'bad':''}" id="smsg" role="status">${esc(syncErr||'')}</span>`;
+    $('sn').addEventListener('click',()=>sync());
+    $('so').addEventListener('click',async()=>{await sb.auth.signOut();});
+  }
+  setPill();
+}
+async function sync(){
+  if(!sb||!user) return;
+  if(syncing){again=true;return;}
+  syncing=true;syncErr=null;setPill();
+  try{
+    const {data,error}=await sb.from(TABLE).select('id,day,performed_on,entries,deleted,created_at,updated_at');
+    if(error) throw error;
+    mergeSessions(data||[]);
+    const remote=new Map((data||[]).map(r=>[r.id,ts(r.updated_at)]));
+    const push=state.sessions.filter(s=>!remote.has(s.id)||ts(s.updated_at)>remote.get(s.id))
+      .map(s=>({id:s.id,user_id:user.id,day:s.day,performed_on:s.performed_on,entries:s.entries,deleted:!!s.deleted,created_at:s.created_at,updated_at:s.updated_at}));
+    if(push.length){const {error:e2}=await sb.from(TABLE).upsert(push);if(e2) throw e2;}
+    persist();renderInfo();renderHistory();lastSync=new Date();
+  }catch(e){syncErr='Sync failed: '+(e.message||'network error')+'. Your sessions are still saved on this device.';}
+  syncing=false;renderSync();
+  if(again){again=false;sync();}
+}
+if(sb){
+  sb.auth.onAuthStateChange((ev,session)=>{
+    const was=user?.id; user=session?.user||null; renderSync();
+    if(user&&user.id!==was) sync();
+  });
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible') sync();});
+}
+
+renderInfo();renderHistory();renderSync();
+</script>
+</body>
+</html>
