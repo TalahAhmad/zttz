@@ -188,6 +188,17 @@ const INVITES = [
     closeLabel:"back to us"
   }
 
+  ,{
+    /* ── WORKOUTS · links to workouts.html (her upper body tracker) ── */
+    kind:     "link",
+    theme:    "monst",
+    tab:      "Workouts",
+    eyebrow:  "for z, from t",
+    title:    "Upper body days",
+    note:     "Your upper body split: back and biceps one day, shoulders and triceps the other. Every move has a picture, and you can log your weights after each session. Sign in once and it follows you from your phone to your laptop.",
+    href:     "workouts.html",
+    cta:      "Open my workouts"
+  }
 
 ];
 
@@ -332,6 +343,8 @@ h1{
 .btn:focus-visible{ outline:2px solid var(--deep); outline-offset:3px; }
 #yes{ background:var(--accent); color:var(--onAccent); box-shadow:0 10px 24px -12px var(--shadow); }
 #yes:hover{ background:var(--deep); }
+.golink{ display:inline-block; text-decoration:none; background:var(--accent); color:var(--onAccent); box-shadow:0 10px 24px -12px var(--shadow); }
+.golink:hover{ background:var(--deep); }
 .slot{ min-width:120px; min-height:48px; display:grid; place-items:center; }
 #no{ background:var(--cardSolid); color:var(--soft); border-color:var(--hair); z-index:50; }
 .taunt{ font-family:"Caveat",cursive; font-size:20px; color:var(--accent); min-height:1.5em; margin-top:16px; }
@@ -864,6 +877,16 @@ body.wide .shell{ width:min(860px,100%); }
           '<button class="btn" id="yes" type="button">Yes</button>'+
           '<span class="slot"><button class="btn" id="no" type="button" aria-label="No, good luck">No</button></span>'+
         '</div><div class="taunt" id="taunt"></div>';
+
+    if(v.kind === "link"){
+      $("card").className = "card fade";
+      $("card").innerHTML =
+        '<div class="eyebrow">'+v.eyebrow+'</div>'+
+        '<h1>'+v.title+'</h1>'+
+        '<p class="note">'+v.note+'</p>'+
+        '<div class="btns"><a class="btn golink" href="'+v.href+'">'+v.cta+'</a></div>';
+      return;
+    }
 
     if(v.kind === "collage"){
       drawCollage(v, s, ask);
