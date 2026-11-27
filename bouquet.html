@@ -504,6 +504,9 @@ const forceSurprise = /[?&]surprise\b/.test(location.search);
 function start(mode){
   timers.forEach(clearTimeout); timers = [];
   surprise = mode === "surprise";
+  /* the button for what's showing gets the pink fill */
+  document.getElementById("again").classList.toggle("primary", !surprise);
+  document.getElementById("surprise").classList.toggle("primary", surprise);
   signed = false; sign.classList.remove("on"); sparks = []; dust = [];
   t0 = Infinity;                       /* blank until the new one starts growing */
   seedNo = 1 + Math.floor(Math.random()*9999);
