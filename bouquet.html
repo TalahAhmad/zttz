@@ -73,7 +73,7 @@ canvas{position:absolute; inset:0; width:100%; height:100%; display:block; curso
     <div class="sign" id="sign">for my Z, from T ♡<small>no wilting. ever. (it's code)</small></div>
   </section>
   <div class="btns">
-    <button class="btn primary" id="again" type="button">Grow it again</button>
+    <button class="btn primary" id="again" type="button">Grow a new one</button>
     <a class="btn" href="index.html">Back</a>
   </div>
   <p class="hint">tap the flowers</p>
@@ -84,7 +84,8 @@ canvas{position:absolute; inset:0; width:100%; height:100%; display:block; curso
    EDIT THESE: the words she sees.
    ════════════════════════════════════════════════════════════════ */
 const SCRIPT  = "python3 bouquet_for_z.py";
-const OUTPUT  = ["growing stems...", "blooming...", "done. 1 bouquet delivered to: Z"];
+const OUTPUT  = ["picking flowers...", "blooming...", "done. bouquet #{n} delivered to: Z"];
+/* {n} becomes this bouquet's number. every number is a different bouquet. */
 
 /* ════════════════════════════════════════════════════════════════
    The bouquet is a grid of cells. Each cell is drawn as a short dash,
@@ -98,23 +99,119 @@ const C = {
   red:"#E5484D", redD:"#B32A35", yellow:"#FFD45C", gold:"#F2A93B", orange:"#F28C3B",
   purple:"#B48AE0", purpleD:"#8A5ABE", white:"#FFF4F8", cream:"#FFE9C7",
   green:"#6CC48A", greenD:"#3F9A62", greenL:"#9BE0B0",
-  paper:"#CDBFC6", paperD:"#9C8C95", paperL:"#E6DCE1"
+  paper:"#CDBFC6", paperD:"#9C8C95", paperL:"#E6DCE1",
+  peach:"#FFC3A0", peachD:"#F59E7A", coral:"#FF8A7A", coralD:"#E5605A",
+  butter:"#FFE9A3", lav:"#B9A3E8", lavD:"#8C72CC", lavL:"#D9CCF5",
+  brown:"#7A4A24", brownD:"#4E2C12", sprout:"#B5D67A"
 };
 
-/* flower recipes: petals = number of petals, kind controls the look */
-const FLOWERS = [
-  { x:45, y:15, r:8.0, petals:6, kind:"daisy", col:[C.pinkL,C.pink],    eye:C.yellow, d:0.00 },
-  { x:30, y:20, r:7.0, petals:5, kind:"rose",  col:[C.red,C.redD],      eye:C.redD,   d:0.25 },
-  { x:60, y:19, r:7.2, petals:8, kind:"daisy", col:[C.yellow,C.gold],   eye:C.orange, d:0.15 },
-  { x:19, y:31, r:6.2, petals:7, kind:"daisy", col:[C.purple,C.purpleD],eye:C.yellow, d:0.45 },
-  { x:71, y:31, r:6.2, petals:5, kind:"rose",  col:[C.pink,C.pinkD],    eye:C.rose,   d:0.35 },
-  { x:38, y:31, r:6.4, petals:8, kind:"daisy", col:[C.white,C.pinkL],   eye:C.gold,   d:0.55 },
-  { x:54, y:32, r:6.0, petals:5, kind:"rose",  col:[C.pinkD,C.rose],    eye:C.rose,   d:0.65 },
-  { x:33, y:6.5,r:4.6, petals:6, kind:"daisy", col:[C.orange,C.gold],   eye:C.redD,   d:0.80 },
-  { x:58, y:5.5,r:4.6, petals:6, kind:"daisy", col:[C.pinkL,C.white],   eye:C.yellow, d:0.75 },
-  { x:12, y:20, r:3.8, petals:5, kind:"bud",   col:[C.pink,C.pinkD],    eye:C.pinkD,  d:0.90 },
-  { x:78, y:20, r:3.8, petals:5, kind:"bud",   col:[C.purple,C.purpleD],eye:C.purpleD,d:0.95 }
+/* ════════════════════════════════════════════════════════════════
+   EVERY GROW IS A NEW BOUQUET. Each run picks flowers, colors, wrap and
+   bow from the lists below. Pink shows up most (her favorite).
+   "w" = how often it gets picked; bigger = more often.
+   ════════════════════════════════════════════════════════════════ */
+const COLORWAYS = [
+  { w:5, col:[C.pinkL,C.pink],     eye:C.yellow },
+  { w:4, col:[C.pink,C.pinkD],     eye:C.rose   },
+  { w:3, col:[C.pinkD,C.rose],     eye:C.rose   },
+  { w:2, col:[C.white,C.pinkL],    eye:C.gold   },
+  { w:2, col:[C.red,C.redD],       eye:C.redD   },
+  { w:2, col:[C.yellow,C.gold],    eye:C.orange },
+  { w:2, col:[C.purple,C.purpleD], eye:C.yellow },
+  { w:1, col:[C.orange,C.gold],    eye:C.redD   },
+  { w:1, col:[C.white,C.cream],    eye:C.yellow }
 ];
+/* ranunculus come in their own softer colors */
+const RANUNCULUS = [
+  { w:4, col:[C.pinkL,C.pink]   },
+  { w:3, col:[C.peach,C.peachD] },
+  { w:2, col:[C.coral,C.coralD] },
+  { w:2, col:[C.white,C.pinkL]  },
+  { w:2, col:[C.pink,C.pinkD]   },
+  { w:1, col:[C.butter,C.yellow]}
+];
+
+/* which flowers can go where. bigger w = shows up more. */
+const BIG_KINDS = [
+  { w:3, kind:"ranunculus" },
+  { w:2, kind:"sunflower"  },
+  { w:2, kind:"daisy"      },
+  { w:2, kind:"rose"       },
+  { w:2, kind:"tulip"      }
+];
+const SMALL_KINDS = [
+  { w:2, kind:"bud"     },
+  { w:2, kind:"tulip"   },
+  { w:2, kind:"daisy"   },
+  { w:1, kind:"ranunculus" }
+];
+const FILLER_KINDS = [
+  { w:3, kind:"lavender"    },
+  { w:3, kind:"babysbreath" }
+];
+
+const WRAPS = [
+  { w:3, paper:"#CDBFC6", paperD:"#9C8C95", paperL:"#E6DCE1" },   /* soft grey-pink */
+  { w:3, paper:"#F2C4D3", paperD:"#D892AA", paperL:"#FBE1EA", pinkish:true },   /* blush */
+  { w:2, paper:"#D6B48C", paperD:"#A9855E", paperL:"#E8CDAA" },   /* kraft paper */
+  { w:2, paper:"#CDBDE6", paperD:"#9C88C2", paperL:"#E3D8F4" },   /* lilac */
+  { w:1, paper:"#EDEAE6", paperD:"#BDB6AF", paperL:"#FFFFFF" }    /* white */
+];
+const BOWS = [
+  { w:4, a:C.pink,  b:C.pinkD,   knot:C.rose, pinkish:true },
+  { w:2, a:C.red,   b:C.redD,    knot:"#8E1F2A" },
+  { w:2, a:C.white, b:C.pinkL,   knot:C.pinkD }
+];
+
+/* where flowers can go. big ones are always there; "maybe" ones sometimes. */
+const SLOTS = [
+  { x:45, y:15, r:8.0, d:0.00 },
+  { x:30, y:20, r:7.0, d:0.25 },
+  { x:60, y:19, r:7.2, d:0.15 },
+  { x:19, y:31, r:6.2, d:0.45 },
+  { x:71, y:31, r:6.2, d:0.35 },
+  { x:38, y:31, r:6.4, d:0.55 },
+  { x:54, y:32, r:6.0, d:0.65 },
+  { x:33, y:6.5,r:4.6, d:0.80, maybe:true },
+  { x:58, y:5.5,r:4.6, d:0.75, maybe:true },
+  { x:12, y:20, r:3.8, d:0.90, maybe:true, small:true },
+  { x:78, y:20, r:3.8, d:0.95, maybe:true, small:true },
+  { x:21, y:11, r:4.6, d:1.05, maybe:true, filler:true },
+  { x:69, y:10, r:4.6, d:1.10, maybe:true, filler:true },
+  { x:45, y:3.5,r:3.6, d:1.15, maybe:true, filler:true }
+];
+
+function pick(rnd, list){
+  let n = rnd() * list.reduce((s,o) => s + o.w, 0);
+  for(const o of list){ if((n -= o.w) < 0) return o; }
+  return list[0];
+}
+
+let FLOWERS = [], WRAP = WRAPS[0], BOW = BOWS[0];
+
+function shuffle(rnd){
+  WRAP = pick(rnd, WRAPS);
+  BOW  = pick(rnd, BOWS.filter(b => !(WRAP.pinkish && b.pinkish)));   /* a pink bow vanishes on pink paper */
+  FLOWERS = [];
+  let suns = 0;
+  SLOTS.forEach(s => {
+    if(s.maybe && rnd() < .25) return;
+    let kind = pick(rnd, s.filler ? FILLER_KINDS : s.small ? SMALL_KINDS : BIG_KINDS).kind;
+    if(kind === "sunflower" && suns >= 2) kind = "ranunculus";   /* keep it from going all yellow */
+    if(kind === "sunflower") suns++;
+    let cw = pick(rnd, COLORWAYS);
+    if(kind === "ranunculus") cw = { ...pick(rnd, RANUNCULUS), eye:C.sprout };
+    if(kind === "sunflower")  cw = { col:[C.yellow,C.gold], eye:C.brown };
+    if(kind === "lavender")   cw = { col:[C.lav,C.lavD],    eye:C.lavL };
+    if(kind === "babysbreath")cw = { col:[C.white,C.cream], eye:C.white };
+    FLOWERS.push({
+      x: s.x + (rnd()-.5)*4, y: s.y + (rnd()-.5)*3,
+      r: s.r * (.88 + rnd()*.24),
+      petals: kind === "sunflower" ? 14 + Math.floor(rnd()*5) : 5 + Math.floor(rnd()*4),
+      kind, col: cw.col, eye: cw.eye, d: s.d
+    });
+  });
+}
 
 const KNOT = { x:45, y:57 };          /* where the stems meet, under the bow */
 const CONE = { topY:40, apexY:59, half:18, apex:3 };
@@ -129,9 +226,10 @@ function put(map, x, y, z, col, t, sway){
   map.set(k, { x, y, z, col, t, sway });
 }
 
-function build(){
+function build(seed){
   const m = new Map();
-  const rnd = mulberry(20240930);    /* their date, so it always looks the same */
+  const rnd = mulberry(seed);
+  shuffle(rnd);
 
   /* stems: one per flower, from the knot up to the flower */
   FLOWERS.forEach(f => {
@@ -166,7 +264,8 @@ function build(){
   /* flowers */
   FLOWERS.forEach(f => {
     const R = f.r, start = 2.6 + f.d*1.4;
-    for(let dy=-R-1; dy<=R+1; dy++) for(let dx=-R-1; dx<=R+1; dx++){
+    const top = f.kind === "lavender" ? -R*2.6 : -R-1;
+    for(let dy=Math.floor(top); dy<=R+1; dy++) for(let dx=-R-1; dx<=R+1; dx++){
       const x = dx, y = dy;
       const rr = Math.hypot(x,y), th = Math.atan2(y,x);
       let inside = false, col = f.col[0], eye = false;
@@ -182,6 +281,40 @@ function build(){
         const swirl = Math.sin(rr*1.7 - th*1.0);
         col = swirl > .25 ? f.col[0] : f.col[1];
         eye = rr <= R*.18;
+      } else if(f.kind === "sunflower"){
+        /* lots of thin yellow petals around a big brown seed head */
+        const edge = R*(.7 + .3*Math.pow(Math.abs(Math.cos(th*f.petals/2)), 1.2));
+        inside = rr <= edge;
+        col = rr > edge*.8 ? f.col[1] : f.col[0];
+        if(rr <= R*.5){ eye = true; }
+        if(rr <= R*.5 && ((dx*3 + dy*5) % 4 === 0)) { eye = false; col = C.brownD; }
+      } else if(f.kind === "ranunculus"){
+        /* tight, round, layer on layer of petals */
+        const edge = R*(.92 + .08*Math.cos(th*11));
+        inside = rr <= edge;
+        const ring = Math.sin(rr*2.1 + Math.sin(th*3)*.6);
+        col = ring > .1 ? f.col[0] : f.col[1];
+        if(rr > edge*.85) col = f.col[1];
+        eye = rr <= R*.16;
+      } else if(f.kind === "tulip"){
+        /* a cup with three pointed tips */
+        const hw = R*.72, u = x/hw;
+        if(Math.abs(u) <= 1){
+          const tipY = -R*(.45 + .5*Math.abs(Math.cos(u*Math.PI)));
+          inside = y >= tipY && (y <= 0 || (x*x)/(hw*hw) + (y*y)/(R*R*.55) <= 1);
+          col = Math.abs(u) < .34 ? f.col[0] : f.col[1];
+        }
+      } else if(f.kind === "lavender"){
+        /* a tall skinny spike of tiny buds */
+        const v = (y - top) / (R + 1 - top);            /* 0 at the tip, 1 at the base */
+        const half = .8 + v*2.0;
+        inside = Math.abs(x) <= half && y <= R*.5 && rnd() > .08;
+        col = (Math.abs(dx) + dy) % 2 === 0 ? f.col[0] : f.col[1];
+        if(v < .12) col = f.eye;
+      } else if(f.kind === "babysbreath"){
+        /* little white puffs scattered around */
+        inside = rr <= R*1.15 && rnd() < .55;
+        col = rnd() < .7 ? f.col[0] : f.col[1];
       } else { /* bud: a teardrop */
         const yy = y + R*.3;
         inside = (x*x)/(R*R*.42) + (yy*yy)/(R*R*.9) <= 1 && y < R*.7;
@@ -200,8 +333,8 @@ function build(){
     for(let x=Math.round(KNOT.x-half); x<=Math.round(KNOT.x+half); x++){
       const rel = (x-KNOT.x)/half;
       const fold = ((x + y*0.9) % 7 + 7) % 7;
-      let col = fold < 1.4 ? C.paperD : (rel < -.3 ? C.paperL : C.paper);
-      if(y === CONE.topY) col = C.paperL;         /* the top edge catches light */
+      let col = fold < 1.4 ? WRAP.paperD : (rel < -.3 ? WRAP.paperL : WRAP.paper);
+      if(y === CONE.topY) col = WRAP.paperL;         /* the top edge catches light */
       put(m, x, y, 4, col, 0.15 + (CONE.apexY-y)*0.028 + Math.abs(rel)*0.1, 0);
     }
   }
@@ -210,12 +343,12 @@ function build(){
   for(let dy=-4; dy<=4; dy++) for(let dx=-11; dx<=11; dx++){
     const lx = Math.abs(dx), loop = (lx>1) && ((lx-6)*(lx-6)/22 + dy*dy/10 <= 1);
     const knot = lx<=1.2 && Math.abs(dy)<=1.5;
-    if(loop || knot) put(m, bx+dx, by+dy, 5, knot ? C.rose : (dy<0 ? C.pink : C.pinkD), 1.6 + lx*0.03, 0);
+    if(loop || knot) put(m, bx+dx, by+dy, 5, knot ? BOW.knot : (dy<0 ? BOW.a : BOW.b), 1.6 + lx*0.03, 0);
   }
   /* ribbon tails */
   for(let i=0;i<7;i++){
-    put(m, bx-1-i*.7, by+2+i, 5, C.pinkD, 1.8+i*.04, 0);
-    put(m, bx+1+i*.7, by+2+i, 5, C.pink,  1.8+i*.04, 0);
+    put(m, bx-1-i*.7, by+2+i, 5, BOW.b, 1.8+i*.04, 0);
+    put(m, bx+1+i*.7, by+2+i, 5, BOW.a,  1.8+i*.04, 0);
   }
 
   cells = [...m.values()].map(c => ({ ...c, ph: rnd()*6.28, glint: rnd() }));
@@ -297,7 +430,7 @@ cv.addEventListener("pointerdown", e => {
    ════════════════════════════════════════════════════════════════ */
 const term = document.getElementById("term"), sign = document.getElementById("sign");
 const PROMPT = '<span class="p">z@monst</span> <span class="path">~/Desktop</span> % ';
-let signed = false, timers = [];
+let signed = false, timers = [], seedNo = 0;
 
 function later(fn, ms){ timers.push(setTimeout(fn, ms)); }
 
@@ -312,7 +445,7 @@ function typeCmd(done){
 }
 
 function log(i){
-  const lines = OUTPUT.slice(0, i+1).map(s => '<div class="out">' + s + '</div>').join("");
+  const lines = OUTPUT.slice(0, i+1).map(s => '<div class="out">' + s.replace("{n}", seedNo) + '</div>').join("");
   term.innerHTML = PROMPT + SCRIPT + lines;
 }
 
@@ -325,7 +458,9 @@ function finish(){
 function start(){
   timers.forEach(clearTimeout); timers = [];
   signed = false; sign.classList.remove("on"); sparks = []; dust = [];
-  size(); build();
+  t0 = Infinity;                       /* blank until the new one starts growing */
+  seedNo = 1 + Math.floor(Math.random()*9999);
+  size(); build(seedNo);
   cx.clearRect(0,0,cv.width,cv.height);
   typeCmd(() => {
     log(0);
