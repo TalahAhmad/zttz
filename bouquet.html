@@ -99,7 +99,10 @@ const C = {
   red:"#E5484D", redD:"#B32A35", yellow:"#FFD45C", gold:"#F2A93B", orange:"#F28C3B",
   purple:"#B48AE0", purpleD:"#8A5ABE", white:"#FFF4F8", cream:"#FFE9C7",
   green:"#6CC48A", greenD:"#3F9A62", greenL:"#9BE0B0",
-  paper:"#CDBFC6", paperD:"#9C8C95", paperL:"#E6DCE1"
+  paper:"#CDBFC6", paperD:"#9C8C95", paperL:"#E6DCE1",
+  peach:"#FFC3A0", peachD:"#F59E7A", coral:"#FF8A7A", coralD:"#E5605A",
+  butter:"#FFE9A3", lav:"#B9A3E8", lavD:"#8C72CC", lavL:"#D9CCF5",
+  brown:"#7A4A24", brownD:"#4E2C12", sprout:"#B5D67A"
 };
 
 /* ════════════════════════════════════════════════════════════════
@@ -118,6 +121,35 @@ const COLORWAYS = [
   { w:1, col:[C.orange,C.gold],    eye:C.redD   },
   { w:1, col:[C.white,C.cream],    eye:C.yellow }
 ];
+/* ranunculus come in their own softer colors */
+const RANUNCULUS = [
+  { w:4, col:[C.pinkL,C.pink]   },
+  { w:3, col:[C.peach,C.peachD] },
+  { w:2, col:[C.coral,C.coralD] },
+  { w:2, col:[C.white,C.pinkL]  },
+  { w:2, col:[C.pink,C.pinkD]   },
+  { w:1, col:[C.butter,C.yellow]}
+];
+
+/* which flowers can go where. bigger w = shows up more. */
+const BIG_KINDS = [
+  { w:3, kind:"ranunculus" },
+  { w:2, kind:"sunflower"  },
+  { w:2, kind:"daisy"      },
+  { w:2, kind:"rose"       },
+  { w:2, kind:"tulip"      }
+];
+const SMALL_KINDS = [
+  { w:2, kind:"bud"     },
+  { w:2, kind:"tulip"   },
+  { w:2, kind:"daisy"   },
+  { w:1, kind:"ranunculus" }
+];
+const FILLER_KINDS = [
+  { w:3, kind:"lavender"    },
+  { w:3, kind:"babysbreath" }
+];
+
 const WRAPS = [
   { w:3, paper:"#CDBFC6", paperD:"#9C8C95", paperL:"#E6DCE1" },   /* soft grey-pink */
   { w:3, paper:"#F2C4D3", paperD:"#D892AA", paperL:"#FBE1EA", pinkish:true },   /* blush */
@@ -143,7 +175,10 @@ const SLOTS = [
   { x:33, y:6.5,r:4.6, d:0.80, maybe:true },
   { x:58, y:5.5,r:4.6, d:0.75, maybe:true },
   { x:12, y:20, r:3.8, d:0.90, maybe:true, small:true },
-  { x:78, y:20, r:3.8, d:0.95, maybe:true, small:true }
+  { x:78, y:20, r:3.8, d:0.95, maybe:true, small:true },
+  { x:21, y:11, r:4.6, d:1.05, maybe:true, filler:true },
+  { x:69, y:10, r:4.6, d:1.10, maybe:true, filler:true },
+  { x:45, y:3.5,r:3.6, d:1.15, maybe:true, filler:true }
 ];
 
 function pick(rnd, list){
@@ -158,15 +193,21 @@ function shuffle(rnd){
   WRAP = pick(rnd, WRAPS);
   BOW  = pick(rnd, BOWS.filter(b => !(WRAP.pinkish && b.pinkish)));   /* a pink bow vanishes on pink paper */
   FLOWERS = [];
+  let suns = 0;
   SLOTS.forEach(s => {
     if(s.maybe && rnd() < .25) return;
-    const cw = pick(rnd, COLORWAYS);
-    const k = rnd();
-    const kind = s.small ? (k < .55 ? "bud" : "daisy") : (k < .55 ? "daisy" : "rose");
+    let kind = pick(rnd, s.filler ? FILLER_KINDS : s.small ? SMALL_KINDS : BIG_KINDS).kind;
+    if(kind === "sunflower" && suns >= 2) kind = "ranunculus";   /* keep it from going all yellow */
+    if(kind === "sunflower") suns++;
+    let cw = pick(rnd, COLORWAYS);
+    if(kind === "ranunculus") cw = { ...pick(rnd, RANUNCULUS), eye:C.sprout };
+    if(kind === "sunflower")  cw = { col:[C.yellow,C.gold], eye:C.brown };
+    if(kind === "lavender")   cw = { col:[C.lav,C.lavD],    eye:C.lavL };
+    if(kind === "babysbreath")cw = { col:[C.white,C.cream], eye:C.white };
     FLOWERS.push({
       x: s.x + (rnd()-.5)*4, y: s.y + (rnd()-.5)*3,
       r: s.r * (.88 + rnd()*.24),
-      petals: 5 + Math.floor(rnd()*4),
+      petals: kind === "sunflower" ? 14 + Math.floor(rnd()*5) : 5 + Math.floor(rnd()*4),
       kind, col: cw.col, eye: cw.eye, d: s.d
     });
   });
@@ -223,7 +264,8 @@ function build(seed){
   /* flowers */
   FLOWERS.forEach(f => {
     const R = f.r, start = 2.6 + f.d*1.4;
-    for(let dy=-R-1; dy<=R+1; dy++) for(let dx=-R-1; dx<=R+1; dx++){
+    const top = f.kind === "lavender" ? -R*2.6 : -R-1;
+    for(let dy=Math.floor(top); dy<=R+1; dy++) for(let dx=-R-1; dx<=R+1; dx++){
       const x = dx, y = dy;
       const rr = Math.hypot(x,y), th = Math.atan2(y,x);
       let inside = false, col = f.col[0], eye = false;
@@ -239,6 +281,40 @@ function build(seed){
         const swirl = Math.sin(rr*1.7 - th*1.0);
         col = swirl > .25 ? f.col[0] : f.col[1];
         eye = rr <= R*.18;
+      } else if(f.kind === "sunflower"){
+        /* lots of thin yellow petals around a big brown seed head */
+        const edge = R*(.7 + .3*Math.pow(Math.abs(Math.cos(th*f.petals/2)), 1.2));
+        inside = rr <= edge;
+        col = rr > edge*.8 ? f.col[1] : f.col[0];
+        if(rr <= R*.5){ eye = true; }
+        if(rr <= R*.5 && ((dx*3 + dy*5) % 4 === 0)) { eye = false; col = C.brownD; }
+      } else if(f.kind === "ranunculus"){
+        /* tight, round, layer on layer of petals */
+        const edge = R*(.92 + .08*Math.cos(th*11));
+        inside = rr <= edge;
+        const ring = Math.sin(rr*2.1 + Math.sin(th*3)*.6);
+        col = ring > .1 ? f.col[0] : f.col[1];
+        if(rr > edge*.85) col = f.col[1];
+        eye = rr <= R*.16;
+      } else if(f.kind === "tulip"){
+        /* a cup with three pointed tips */
+        const hw = R*.72, u = x/hw;
+        if(Math.abs(u) <= 1){
+          const tipY = -R*(.45 + .5*Math.abs(Math.cos(u*Math.PI)));
+          inside = y >= tipY && (y <= 0 || (x*x)/(hw*hw) + (y*y)/(R*R*.55) <= 1);
+          col = Math.abs(u) < .34 ? f.col[0] : f.col[1];
+        }
+      } else if(f.kind === "lavender"){
+        /* a tall skinny spike of tiny buds */
+        const v = (y - top) / (R + 1 - top);            /* 0 at the tip, 1 at the base */
+        const half = .8 + v*2.0;
+        inside = Math.abs(x) <= half && y <= R*.5 && rnd() > .08;
+        col = (Math.abs(dx) + dy) % 2 === 0 ? f.col[0] : f.col[1];
+        if(v < .12) col = f.eye;
+      } else if(f.kind === "babysbreath"){
+        /* little white puffs scattered around */
+        inside = rr <= R*1.15 && rnd() < .55;
+        col = rnd() < .7 ? f.col[0] : f.col[1];
       } else { /* bud: a teardrop */
         const yy = y + R*.3;
         inside = (x*x)/(R*R*.42) + (yy*yy)/(R*R*.9) <= 1 && y < R*.7;
