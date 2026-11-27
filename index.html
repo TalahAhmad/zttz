@@ -207,9 +207,8 @@ const INVITES = [
     tab:      "Bouquet",
     eyebrow:  "for z, from t",
     title:    "I miss you, monst &lt;3",
-    note:     "Real ones wilt. These don't. Hit the button, watch them grow, and tap the petals once they bloom.",
     href:     "bouquet.html",
-    cta:      "Open your bouquet"
+    cta:      "Unwrap"
   }
 
 ];
@@ -895,7 +894,7 @@ body.wide .shell{ width:min(860px,100%); }
       $("card").innerHTML =
         '<div class="eyebrow">'+v.eyebrow+'</div>'+
         '<h1>'+v.title+'</h1>'+
-        '<p class="note">'+v.note+'</p>'+
+        (v.note ? '<p class="note">'+v.note+'</p>' : '')+
         '<div class="btns"><a class="btn golink" href="'+v.href+'">'+v.cta+'</a></div>';
       return;
     }
