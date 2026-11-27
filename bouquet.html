@@ -77,7 +77,6 @@ canvas{position:absolute; inset:0; width:100%; height:100%; display:block; curso
     <button class="btn" id="surprise" type="button">Surprise</button>
     <a class="btn" href="index.html">Back</a>
   </div>
-  <p class="hint">tap the flowers</p>
 </main>
 
 <script>
@@ -504,6 +503,9 @@ const forceSurprise = /[?&]surprise\b/.test(location.search);
 function start(mode){
   timers.forEach(clearTimeout); timers = [];
   surprise = mode === "surprise";
+  /* the button for what's showing gets the pink fill */
+  document.getElementById("again").classList.toggle("primary", !surprise);
+  document.getElementById("surprise").classList.toggle("primary", surprise);
   signed = false; sign.classList.remove("on"); sparks = []; dust = [];
   t0 = Infinity;                       /* blank until the new one starts growing */
   seedNo = 1 + Math.floor(Math.random()*9999);
