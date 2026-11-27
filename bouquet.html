@@ -26,7 +26,7 @@ body{
     radial-gradient(600px 500px at 50% 110%, rgba(127,199,159,.08), transparent 60%),
     var(--page);
   color:var(--ink); font-family:"Karla", system-ui, sans-serif;
-  display:grid; place-items:center; padding:22px 14px 36px;
+  display:grid; place-items:center; grid-template-columns:minmax(0,1fr); padding:22px 14px 36px;
   -webkit-font-smoothing:antialiased;
 }
 .shell{width:min(620px,100%); display:flex; flex-direction:column; gap:16px}
@@ -37,7 +37,7 @@ body{
 .bar{display:flex; align-items:center; gap:8px; padding:10px 14px; background:var(--bar); border-bottom:1px solid var(--line)}
 .dot{width:12px; height:12px; border-radius:50%}
 .dot:nth-child(1){background:#FF5F57}.dot:nth-child(2){background:#FEBC2E}.dot:nth-child(3){background:#28C840}
-.bar .title{flex:1; text-align:center; font:500 12px var(--mono); color:var(--muted); margin-right:44px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.bar .title{flex:1; min-width:0; text-align:center; font:500 12px var(--mono); color:var(--muted); margin-right:44px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .term{padding:14px 16px 6px; font:13px/1.6 var(--mono); min-height:3.4em}
 .term .p{color:var(--green)}
 .term .path{color:#86BDE0}
@@ -70,10 +70,11 @@ canvas{position:absolute; inset:0; width:100%; height:100%; display:block; curso
     <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="title">Desktop — python3 bouquet_for_z.py — 90×72</span></div>
     <div class="term" id="term" aria-live="polite"></div>
     <div class="stage"><canvas id="c" role="img" aria-label="An animated bouquet of pink, red, yellow and purple flowers wrapped in paper with a pink bow"></canvas></div>
-    <div class="sign" id="sign">for my Z, from T ♡<small>no wilting. ever. (it's code)</small></div>
+    <div class="sign" id="sign">for my Z, from T ♡</div>
   </section>
   <div class="btns">
     <button class="btn primary" id="again" type="button">Grow a new one</button>
+    <button class="btn" id="surprise" type="button">Surprise</button>
     <a class="btn" href="index.html">Back</a>
   </div>
   <p class="hint">tap the flowers</p>
@@ -486,9 +487,10 @@ const SIGN = sign.innerHTML;
 let surprise = false, grows = 0;
 const forceSurprise = /[?&]surprise\b/.test(location.search);
 
-function start(){
+function start(mode){
   timers.forEach(clearTimeout); timers = [];
-  surprise = forceSurprise ? grows === 0 : (grows > 0 && !surprise && Math.random() < SURPRISE_CHANCE);
+  if(mode === "surprise") surprise = true;
+  else surprise = forceSurprise ? grows === 0 : (grows > 0 && !surprise && Math.random() < SURPRISE_CHANCE);
   grows++;
   signed = false; sign.classList.remove("on"); sparks = []; dust = [];
   t0 = Infinity;                       /* blank until the new one starts growing */
@@ -503,7 +505,8 @@ function start(){
   });
 }
 
-document.getElementById("again").addEventListener("click", start);
+document.getElementById("again").addEventListener("click", () => start());
+document.getElementById("surprise").addEventListener("click", () => start("surprise"));
 (document.fonts ? document.fonts.ready : Promise.resolve()).then(start);
 </script>
 </body>
