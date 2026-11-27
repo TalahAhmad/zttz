@@ -37,6 +37,7 @@ const INVITES = [
   {
     theme:    "blush",
     tab:      "Game night",
+    blurb:    "best of three, winner picks the prize",
     eyebrow:  "for z — from t",
     title:    "Game night?",
     note:     "Hey Z, I had a lot of fun playing house with you. I miss you so much. Can you come back soon? I can't wait to see you. But in the meantime, let's do something fun. What do you think?",
@@ -53,6 +54,7 @@ const INVITES = [
   ,{
     theme:    "meadow",
     tab:      "Yap session",
+    blurb:    "no agenda, just you talking at me",
     eyebrow:  "for z — from t",
     title:    "Yap session?",
     note:     "No plan, no agenda, nowhere to be. Just you talking at me about whatever's been rattling around your head, and me not getting bored of it. I've been saving up things to tell you.",
@@ -85,6 +87,7 @@ const INVITES = [
     open:     true,                 /* the page opens on this tab */
     theme:    "monst",
     tab:      "Two years",
+    blurb:    "our anniversary paper, map and letter",
     eyebrow:  "for z, from t",
 
     since:    "2024-09-30T00:00:00", /* the counter counts up from here */
@@ -193,6 +196,7 @@ const INVITES = [
     kind:     "link",
     theme:    "monst",
     tab:      "Workouts",
+    blurb:    "your upper body days",
     eyebrow:  "for z, from t",
     title:    "Upper body days",
     note:     "Your upper body split: back and biceps one day, shoulders and triceps the other. Every move has a picture, and you can log your weights after each session. Sign in once and it follows you from your phone to your laptop.",
@@ -205,6 +209,7 @@ const INVITES = [
     kind:     "link",
     theme:    "monst",
     tab:      "Bouquet",
+    blurb:    "coded flowers, new every time",
     eyebrow:  "for z, from t",
     title:    "I miss you, monst &lt;3",
     href:     "bouquet.html",
@@ -272,6 +277,13 @@ const THEMES = {
 };
 
 const INITIALS = "ztzt";
+
+/* the home page: the first thing she sees. each tab above gets a tile. */
+const HOME = {
+  title:   "z + t",
+  tagline: "Enter for fun times, mems, jokes and everything else in between",
+  theme:   "monst"
+};
 </script>
 
 <style>
@@ -595,12 +607,39 @@ body.wide .shell{ width:min(860px,100%); }
 @media (prefers-reduced-motion: reduce){
   *{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
 }
+
+/* ── home page ── */
+.home h1{ font-size:clamp(54px,15vw,84px); margin:2px 0 6px; letter-spacing:-.01em; }
+.home h1 .plus{ font-family:"Caveat",cursive; color:var(--pinkDeep,var(--accent)); font-weight:600; margin:0 .08em; }
+.home .tagline{ color:var(--soft); max-width:34ch; margin:0 auto 26px; font-size:16px; }
+.tiles{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; text-align:left; }
+.tile{
+  display:flex; flex-direction:column; gap:4px; text-decoration:none; color:var(--ink);
+  background:var(--pinkSoft,#fff); border:1px solid var(--hair); border-radius:18px; padding:16px 16px 14px;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.tile:hover{ transform:translateY(-2px); border-color:var(--accent); box-shadow:0 14px 28px -18px var(--shadow); }
+.tile:focus-visible{ outline:2px solid var(--deep); outline-offset:3px; }
+.tile .t{ font-family:"Fraunces",Georgia,serif; font-weight:600; font-size:19px; line-height:1.2; display:flex; justify-content:space-between; gap:8px; }
+.tile .t .go{ color:var(--accent); font-family:"Karla",sans-serif; }
+.tile .b{ color:var(--soft); font-size:13.5px; line-height:1.4; }
+.tile .yes{ color:var(--pinkDeep,var(--accent)); }
+
+/* the little way back home, shown inside a tab */
+.homebar{ display:flex; justify-content:flex-start; margin-bottom:14px; }
+.homebar.hide{ display:none; }
+.homebtn{
+  font-family:"Karla",sans-serif; font-weight:700; font-size:13px; letter-spacing:.04em; text-decoration:none;
+  padding:8px 16px; border-radius:999px; border:1px solid var(--hair); background:var(--tabBg); color:var(--tabInk); transition:.18s;
+}
+.homebtn:hover{ background:#fff; color:var(--accent); }
+.homebtn:focus-visible{ outline:2px solid var(--deep); outline-offset:3px; }
 </style>
 </head>
 <body>
 
 <div class="shell">
-  <nav class="tabs" id="tabs"></nav>
+  <nav class="homebar hide" id="homebar"><a class="homebtn" href="#" id="homebtn">&larr; home</a></nav>
 
   <main class="card" id="card"></main>
 
@@ -635,27 +674,38 @@ body.wide .shell{ width:min(860px,100%); }
   const $ = id => document.getElementById(id);
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const state = INVITES.map(v=>({ said:false, day:null, used:false, found:[], flips:{}, pin:"indy" }));
-  let active = Math.max(0, INVITES.findIndex(v => v.open));
+  const slug = v => v.tab.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+  const fromHash = () => INVITES.findIndex(v => "#"+slug(v) === location.hash);
+  let active = fromHash();          /* -1 = the home page */
 
   $("initials").textContent = INITIALS;
 
-  /* tabs */
-  const tabsEl = $("tabs");
+  /* home <-> tabs. each tab lives at #its-name so links and the back button work */
   function drawTabs(){
-    if(INVITES.length < 2){ tabsEl.classList.add("hide"); return; }
-    tabsEl.classList.remove("hide");
-    tabsEl.innerHTML = INVITES.map((v,i) =>
-      '<button class="tab'+(i===active?' on':'')+'" type="button" data-i="'+i+'">'+v.tab+
-      (state[i].said ? '<span class="yes">&#9825;</span>' : '')+'</button>').join("");
+    $("homebar").classList.toggle("hide", active < 0);
   }
-  tabsEl.addEventListener("click", e=>{
-    const b = e.target.closest(".tab"); if(!b) return;
-    active = +b.dataset.i; drawTabs(); drawCard();
+  addEventListener("hashchange", ()=>{
+    active = fromHash(); drawTabs(); drawCard(); scrollTo(0,0);
   });
+
+  function drawHome(){
+    document.body.classList.remove("wide");
+    $("card").className = "card fade home";
+    const t = HOME.title.replace("+", '<span class="plus">+</span>');
+    $("card").innerHTML =
+      '<h1>'+t+'</h1>'+
+      '<p class="tagline">'+HOME.tagline+'</p>'+
+      '<nav class="tiles">'+INVITES.map((v,i) =>
+        '<a class="tile" href="#'+slug(v)+'">'+
+          '<span class="t">'+v.tab+(state[i].said ? ' <span class="yes">&#9825;</span>' : '')+'<span class="go">&rarr;</span></span>'+
+          (v.blurb ? '<span class="b">'+v.blurb+'</span>' : '')+
+        '</a>').join("")+
+      '</nav>';
+  }
 
   /* paint the active theme onto the page */
   function paint(){
-    const t = INVITES[active].theme;
+    const t = active < 0 ? HOME.theme : INVITES[active].theme;
     const th = (t && typeof t === "object") ? Object.assign({}, THEMES.blush, t)
                                             : (THEMES[t] || THEMES.blush);
     const r = document.documentElement.style;
@@ -878,6 +928,7 @@ body.wide .shell{ width:min(860px,100%); }
   function drawCard(){
     paint();
     if(tick){ clearInterval(tick); tick = null; }
+    if(active < 0){ drawHome(); return; }
     const v = INVITES[active], s = state[active];
     document.body.classList.toggle("wide", v.kind === "collage");
     const rows = (v.rows||[]).filter(r=>r.v).map(r =>
