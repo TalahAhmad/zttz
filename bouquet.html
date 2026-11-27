@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>a bouquet for z</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Ctext%20x%3D%2232%22%20y%3D%2248%22%20text-anchor%3D%22middle%22%20font-size%3D%2244%22%3E%F0%9F%92%90%3C%2Ftext%3E%3C%2Fsvg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=JetBrains+Mono:wght@400;600&family=Karla:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* A terminal window that "runs" a script and grows a bouquet out of little
+   dash-shaped pixels, like the TikTok. Colors are hers: light pink first. */
+:root{
+  --page:#140F13; --win:#1B1519; --bar:#2A2027; --line:#3A2C35;
+  --ink:#F3E8EC; --muted:#A8949E; --pink:#F4AFC4; --pinkDeep:#E07FA0; --green:#7FC79F;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --hand:"Caveat", "Comic Sans MS", cursive;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  min-height:100svh; background:
+    radial-gradient(700px 420px at 50% -10%, rgba(244,175,196,.16), transparent 65%),
+    radial-gradient(600px 500px at 50% 110%, rgba(127,199,159,.08), transparent 60%),
+    var(--page);
+  color:var(--ink); font-family:"Karla", system-ui, sans-serif;
+  display:grid; place-items:center; padding:22px 14px 36px;
+  -webkit-font-smoothing:antialiased;
+}
+.shell{width:min(620px,100%); display:flex; flex-direction:column; gap:16px}
+.win{
+  background:var(--win); border:1px solid var(--line); border-radius:14px; overflow:hidden;
+  box-shadow:0 30px 80px -30px rgba(244,175,196,.35), 0 0 0 1px rgba(255,255,255,.02) inset;
+}
+.bar{display:flex; align-items:center; gap:8px; padding:10px 14px; background:var(--bar); border-bottom:1px solid var(--line)}
+.dot{width:12px; height:12px; border-radius:50%}
+.dot:nth-child(1){background:#FF5F57}.dot:nth-child(2){background:#FEBC2E}.dot:nth-child(3){background:#28C840}
+.bar .title{flex:1; text-align:center; font:500 12px var(--mono); color:var(--muted); margin-right:44px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.term{padding:14px 16px 6px; font:13px/1.6 var(--mono); min-height:3.4em}
+.term .p{color:var(--green)}
+.term .path{color:#86BDE0}
+.term .out{color:var(--muted)}
+.caret{display:inline-block; width:.6em; height:1.1em; vertical-align:-.2em; background:var(--pink); animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.stage{position:relative; width:100%; aspect-ratio: 90 / 72}
+canvas{position:absolute; inset:0; width:100%; height:100%; display:block; cursor:pointer; touch-action:manipulation}
+.sign{
+  text-align:center; font:600 clamp(1.6rem,6vw,2.1rem)/1.15 var(--hand); color:var(--pink);
+  padding:4px 16px 18px; min-height:2.6em; opacity:0; transform:translateY(6px); transition:opacity .9s ease, transform .9s ease;
+}
+.sign.on{opacity:1; transform:none}
+.sign small{display:block; font:400 12px var(--mono); color:var(--muted); margin-top:6px; letter-spacing:.02em}
+.btns{display:flex; gap:10px; justify-content:center; flex-wrap:wrap}
+.btn{
+  font:700 14px "Karla", system-ui, sans-serif; text-decoration:none; cursor:pointer;
+  border-radius:999px; padding:9px 18px; border:1px solid var(--line); background:transparent; color:var(--ink);
+}
+.btn:hover{border-color:var(--pink); color:var(--pink)}
+.btn.primary{background:var(--pink); border-color:var(--pink); color:#3A1A28}
+.btn.primary:hover{filter:brightness(1.06); color:#3A1A28}
+.btn:focus-visible{outline:2px solid var(--pink); outline-offset:3px}
+.hint{text-align:center; font:12px var(--mono); color:var(--muted); margin:0}
+</style>
+</head>
+<body>
+<main class="shell">
+  <section class="win" aria-label="A bouquet, drawn in code">
+    <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="title">Desktop — python3 bouquet_for_z.py — 90×72</span></div>
+    <div class="term" id="term" aria-live="polite"></div>
+    <div class="stage"><canvas id="c" role="img" aria-label="An animated bouquet of pink, red, yellow and purple flowers wrapped in paper with a pink bow"></canvas></div>
+    <div class="sign" id="sign">for my Z, from T ♡<small>no wilting. ever. (it's code)</small></div>
+  </section>
+  <div class="btns">
+    <button class="btn primary" id="again" type="button">Grow it again</button>
+    <a class="btn" href="index.html">Back</a>
+  </div>
+  <p class="hint">tap the flowers</p>
+</main>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   EDIT THESE: the words she sees.
+   ════════════════════════════════════════════════════════════════ */
+const SCRIPT  = "python3 bouquet_for_z.py";
+const OUTPUT  = ["growing stems...", "blooming...", "done. 1 bouquet delivered to: Z"];
+
+/* ════════════════════════════════════════════════════════════════
+   The bouquet is a grid of cells. Each cell is drawn as a short dash,
+   which is what gives it that terminal look from the video.
+   ════════════════════════════════════════════════════════════════ */
+const W = 90, H = 72;
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const C = {
+  pinkL:"#F9C6D6", pink:"#F4AFC4", pinkD:"#E07FA0", rose:"#C95C7E",
+  red:"#E5484D", redD:"#B32A35", yellow:"#FFD45C", gold:"#F2A93B", orange:"#F28C3B",
+  purple:"#B48AE0", purpleD:"#8A5ABE", white:"#FFF4F8", cream:"#FFE9C7",
+  green:"#6CC48A", greenD:"#3F9A62", greenL:"#9BE0B0",
+  paper:"#CDBFC6", paperD:"#9C8C95", paperL:"#E6DCE1"
+};
+
+/* flower recipes: petals = number of petals, kind controls the look */
+const FLOWERS = [
+  { x:45, y:15, r:8.0, petals:6, kind:"daisy", col:[C.pinkL,C.pink],    eye:C.yellow, d:0.00 },
+  { x:30, y:20, r:7.0, petals:5, kind:"rose",  col:[C.red,C.redD],      eye:C.redD,   d:0.25 },
+  { x:60, y:19, r:7.2, petals:8, kind:"daisy", col:[C.yellow,C.gold],   eye:C.orange, d:0.15 },
+  { x:19, y:31, r:6.2, petals:7, kind:"daisy", col:[C.purple,C.purpleD],eye:C.yellow, d:0.45 },
+  { x:71, y:31, r:6.2, petals:5, kind:"rose",  col:[C.pink,C.pinkD],    eye:C.rose,   d:0.35 },
+  { x:38, y:31, r:6.4, petals:8, kind:"daisy", col:[C.white,C.pinkL],   eye:C.gold,   d:0.55 },
+  { x:54, y:32, r:6.0, petals:5, kind:"rose",  col:[C.pinkD,C.rose],    eye:C.rose,   d:0.65 },
+  { x:33, y:6.5,r:4.6, petals:6, kind:"daisy", col:[C.orange,C.gold],   eye:C.redD,   d:0.80 },
+  { x:58, y:5.5,r:4.6, petals:6, kind:"daisy", col:[C.pinkL,C.white],   eye:C.yellow, d:0.75 },
+  { x:12, y:20, r:3.8, petals:5, kind:"bud",   col:[C.pink,C.pinkD],    eye:C.pinkD,  d:0.90 },
+  { x:78, y:20, r:3.8, petals:5, kind:"bud",   col:[C.purple,C.purpleD],eye:C.purpleD,d:0.95 }
+];
+
+const KNOT = { x:45, y:57 };          /* where the stems meet, under the bow */
+const CONE = { topY:40, apexY:59, half:18, apex:3 };
+
+let cells = [];                       /* {x,y,col,t,layer,sway,glint} */
+
+function put(map, x, y, z, col, t, sway){
+  x = Math.round(x); y = Math.round(y);
+  if(x<0||y<0||x>=W||y>=H) return;
+  const k = y*W+x, cur = map.get(k);
+  if(cur && cur.z > z) return;
+  map.set(k, { x, y, z, col, t, sway });
+}
+
+function build(){
+  const m = new Map();
+  const rnd = mulberry(20240930);    /* their date, so it always looks the same */
+
+  /* stems: one per flower, from the knot up to the flower */
+  FLOWERS.forEach(f => {
+    const n = Math.ceil(Math.hypot(f.x-KNOT.x, f.y-KNOT.y));
+    for(let i=0;i<=n;i++){
+      const u = i/n, bend = Math.sin(u*Math.PI)*(f.x<KNOT.x?-1.2:1.2);
+      const x = KNOT.x + (f.x-KNOT.x)*u + bend, y = KNOT.y + (f.y-KNOT.y)*u;
+      put(m, x, y, 1, u<.5?C.greenD:C.green, 1.1 + u*1.1, u);
+    }
+  });
+  /* stems poking out below the bow */
+  [-3,-1.5,0,1.5,3].forEach((o,i) => {
+    for(let y=KNOT.y; y<=KNOT.y+10-(i%2); y++)
+      put(m, KNOT.x+o*(1-(y-KNOT.y)/22), y, 1, i%2?C.green:C.greenD, 0.9 + (KNOT.y+10-y)*0.03, 0);
+  });
+
+  /* leaves: little ellipses tucked around the top of the wrap and along stems */
+  const LEAVES = [
+    {x:25,y:39,a:-.55,l:6},{x:65,y:39,a:.55,l:6},{x:12,y:37,a:-.8,l:5},{x:78,y:37,a:.8,l:5},
+    {x:29,y:41,a:-.3,l:5},{x:61,y:41,a:.3,l:5},{x:8,y:27,a:-1.1,l:4},{x:82,y:27,a:1.1,l:4},
+    {x:24,y:12,a:-1.2,l:4},{x:67,y:10,a:1.2,l:4}
+  ];
+  LEAVES.forEach((L,i) => {
+    const ca = Math.cos(L.a), sa = Math.sin(L.a);
+    for(let dy=-L.l; dy<=L.l; dy++) for(let dx=-L.l*1.6; dx<=L.l*1.6; dx++){
+      const lx = dx*ca + dy*sa, ly = -dx*sa + dy*ca;
+      const e = (lx*lx)/(L.l*L.l*1.9) + (ly*ly)/(L.l*L.l*.18);
+      if(e<=1) put(m, L.x+dx, L.y+dy*.9, 2, Math.abs(ly)<.6 ? C.greenD : (lx>0?C.greenL:C.green), 2.0 + i*0.06 + Math.abs(lx)*0.03, .7);
+    }
+  });
+
+  /* flowers */
+  FLOWERS.forEach(f => {
+    const R = f.r, start = 2.6 + f.d*1.4;
+    for(let dy=-R-1; dy<=R+1; dy++) for(let dx=-R-1; dx<=R+1; dx++){
+      const x = dx, y = dy;
+      const rr = Math.hypot(x,y), th = Math.atan2(y,x);
+      let inside = false, col = f.col[0], eye = false;
+
+      if(f.kind === "daisy"){
+        const edge = R*(.55 + .45*Math.pow(Math.abs(Math.cos(th*f.petals/2)), .7));
+        inside = rr <= edge;
+        eye = rr <= R*.3;
+        col = rr > edge*.72 ? f.col[1] : f.col[0];
+      } else if(f.kind === "rose"){
+        const edge = R*(.82 + .18*Math.cos(th*f.petals));
+        inside = rr <= edge;
+        const swirl = Math.sin(rr*1.7 - th*1.0);
+        col = swirl > .25 ? f.col[0] : f.col[1];
+        eye = rr <= R*.18;
+      } else { /* bud: a teardrop */
+        const yy = y + R*.3;
+        inside = (x*x)/(R*R*.42) + (yy*yy)/(R*R*.9) <= 1 && y < R*.7;
+        col = x > 0 ? f.col[1] : f.col[0];
+      }
+      if(!inside) continue;
+      if(rnd() < .05) continue;                  /* a few gaps, like the video */
+      put(m, f.x+dx, f.y+dy, 3, eye ? f.eye : col, start + rr*0.06 + rnd()*.08, 1);
+    }
+  });
+
+  /* the wrap: a cone of paper with diagonal folds */
+  for(let y=CONE.topY; y<=CONE.apexY; y++){
+    const u = (y-CONE.topY)/(CONE.apexY-CONE.topY);
+    const half = CONE.half*(1-u) + CONE.apex*u;
+    for(let x=Math.round(KNOT.x-half); x<=Math.round(KNOT.x+half); x++){
+      const rel = (x-KNOT.x)/half;
+      const fold = ((x + y*0.9) % 7 + 7) % 7;
+      let col = fold < 1.4 ? C.paperD : (rel < -.3 ? C.paperL : C.paper);
+      if(y === CONE.topY) col = C.paperL;         /* the top edge catches light */
+      put(m, x, y, 4, col, 0.15 + (CONE.apexY-y)*0.028 + Math.abs(rel)*0.1, 0);
+    }
+  }
+  /* the bow, in her pink */
+  const bx = KNOT.x, by = CONE.apexY - 3;
+  for(let dy=-4; dy<=4; dy++) for(let dx=-11; dx<=11; dx++){
+    const lx = Math.abs(dx), loop = (lx>1) && ((lx-6)*(lx-6)/22 + dy*dy/10 <= 1);
+    const knot = lx<=1.2 && Math.abs(dy)<=1.5;
+    if(loop || knot) put(m, bx+dx, by+dy, 5, knot ? C.rose : (dy<0 ? C.pink : C.pinkD), 1.6 + lx*0.03, 0);
+  }
+  /* ribbon tails */
+  for(let i=0;i<7;i++){
+    put(m, bx-1-i*.7, by+2+i, 5, C.pinkD, 1.8+i*.04, 0);
+    put(m, bx+1+i*.7, by+2+i, 5, C.pink,  1.8+i*.04, 0);
+  }
+
+  cells = [...m.values()].map(c => ({ ...c, ph: rnd()*6.28, glint: rnd() }));
+  return cells;
+}
+
+function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+
+/* ════════════════════════════════════════════════════════════════
+   drawing
+   ════════════════════════════════════════════════════════════════ */
+const cv = document.getElementById("c"), cx = cv.getContext("2d");
+let cw = 0, chh = 0, dpr = 1;
+function size(){
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const r = cv.getBoundingClientRect();
+  cv.width = Math.round(r.width*dpr); cv.height = Math.round(r.height*dpr);
+  cw = cv.width / W; chh = cv.height / H;
+}
+addEventListener("resize", size);
+
+let t0 = 0, running = false, sparks = [], dust = [];
+const GROW_END = 4.8;
+
+function frame(now){
+  const t = (now - t0)/1000 + (reduce ? 99 : 0);
+  cx.clearRect(0,0,cv.width,cv.height);
+
+  for(const c of cells){
+    const age = t - c.t;
+    if(age < 0) continue;
+    const a = Math.min(1, age/0.35);
+    const pop = a < 1 ? 0.4 + 0.6*a : 1;
+    const sway = (!reduce && t > GROW_END-1) ? Math.sin(t*1.1 + c.y*0.12) * 0.35 * c.sway * Math.min(1,(t-GROW_END+1)) : 0;
+    let col = c.col;
+    if(t > GROW_END && c.z === 3 && Math.sin(t*2 + c.ph*3) > .985) col = "#FFFFFF";   /* little glints */
+    drawDash((c.x + sway)*cw, c.y*chh, col, a, pop);
+  }
+
+  /* dust: the drifting specks from the video */
+  if(!reduce && t > 0.5 && dust.length < 36 && Math.random() < .25){
+    dust.push({ x: Math.random()*W, y: 8 + Math.random()*50, vy: -.02 - Math.random()*.04, life: 1,
+      col: [C.pink,C.pinkL,C.white,C.yellow,C.green][Math.floor(Math.random()*5)] });
+  }
+  dust = dust.filter(d => (d.life -= .006) > 0);
+  dust.forEach(d => { d.y += d.vy; d.x += Math.sin(t+d.y)*.02; drawDash(d.x*cw, d.y*chh, d.col, d.life*.7, .55); });
+
+  /* sparks from taps */
+  sparks = sparks.filter(s => (s.life -= .018) > 0);
+  sparks.forEach(s => { s.x += s.vx; s.y += s.vy; s.vy += .012; drawDash(s.x*cw, s.y*chh, s.col, s.life, .8); });
+
+  if(t > GROW_END && !signed) finish();
+  if(running) requestAnimationFrame(frame);
+}
+
+function drawDash(px, py, col, alpha, scale){
+  const w = cw*0.78*scale, h = Math.max(1, chh*0.42*scale);
+  cx.globalAlpha = alpha;
+  cx.fillStyle = col;
+  cx.beginPath();
+  cx.roundRect ? cx.roundRect(px + (cw-w)/2, py + (chh-h)/2, w, h, h/2) : cx.rect(px + (cw-w)/2, py + (chh-h)/2, w, h);
+  cx.fill();
+  cx.globalAlpha = 1;
+}
+
+/* tap the bouquet: a little burst of petals */
+cv.addEventListener("pointerdown", e => {
+  const r = cv.getBoundingClientRect();
+  const gx = (e.clientX - r.left)/r.width*W, gy = (e.clientY - r.top)/r.height*H;
+  const pal = [C.pink,C.pinkL,C.pinkD,C.white,C.yellow,C.red,C.purple];
+  for(let i=0;i<22;i++){
+    const a = Math.random()*6.28, v = .15 + Math.random()*.35;
+    sparks.push({ x:gx, y:gy, vx:Math.cos(a)*v, vy:Math.sin(a)*v - .2, life:1, col:pal[i%pal.length] });
+  }
+});
+
+/* ════════════════════════════════════════════════════════════════
+   the terminal bit
+   ════════════════════════════════════════════════════════════════ */
+const term = document.getElementById("term"), sign = document.getElementById("sign");
+const PROMPT = '<span class="p">z@monst</span> <span class="path">~/Desktop</span> % ';
+let signed = false, timers = [];
+
+function later(fn, ms){ timers.push(setTimeout(fn, ms)); }
+
+function typeCmd(done){
+  if(reduce){ term.innerHTML = PROMPT + SCRIPT; done(); return; }
+  let i = 0;
+  (function step(){
+    term.innerHTML = PROMPT + SCRIPT.slice(0,i) + '<span class="caret"></span>';
+    if(i++ < SCRIPT.length) later(step, 45 + Math.random()*55);
+    else later(done, 350);
+  })();
+}
+
+function log(i){
+  const lines = OUTPUT.slice(0, i+1).map(s => '<div class="out">' + s + '</div>').join("");
+  term.innerHTML = PROMPT + SCRIPT + lines;
+}
+
+function finish(){
+  signed = true;
+  log(OUTPUT.length-1);
+  sign.classList.add("on");
+}
+
+function start(){
+  timers.forEach(clearTimeout); timers = [];
+  signed = false; sign.classList.remove("on"); sparks = []; dust = [];
+  size(); build();
+  cx.clearRect(0,0,cv.width,cv.height);
+  typeCmd(() => {
+    log(0);
+    later(() => log(1), 2400);
+    t0 = performance.now();
+    if(!running){ running = true; requestAnimationFrame(frame); }
+  });
+}
+
+document.getElementById("again").addEventListener("click", start);
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(start);
+</script>
+</body>
+</html>
