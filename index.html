@@ -200,6 +200,17 @@ const INVITES = [
     cta:      "Open my workouts"
   }
 
+  ,{
+    /* ── BOUQUET · links to bouquet.html (flowers, drawn in code) ── */
+    kind:     "link",
+    theme:    "monst",
+    tab:      "Bouquet",
+    eyebrow:  "for z, from t",
+    title:    "I miss you, monst &lt;3",
+    href:     "bouquet.html",
+    cta:      "Unwrap"
+  }
+
 ];
 
 /* shared across every tab */
@@ -883,7 +894,7 @@ body.wide .shell{ width:min(860px,100%); }
       $("card").innerHTML =
         '<div class="eyebrow">'+v.eyebrow+'</div>'+
         '<h1>'+v.title+'</h1>'+
-        '<p class="note">'+v.note+'</p>'+
+        (v.note ? '<p class="note">'+v.note+'</p>' : '')+
         '<div class="btns"><a class="btn golink" href="'+v.href+'">'+v.cta+'</a></div>';
       return;
     }
